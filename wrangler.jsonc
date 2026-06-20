@@ -1,0 +1,13 @@
+{
+  // Cloudflare Workers/Pages — statik SPA (Vite + React Router) deploy.
+  // `npx wrangler deploy` shu konfiguratsiyani o'qiydi.
+  "name": "rateradar-frontend",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    // Vite build natijasi shu papkaga chiqadi.
+    "directory": "./dist",
+    // SPA: topilmagan yo'llar index.html'ga yo'naltiriladi —
+    // shunda /dashboard, /security, /billing to'g'ridan ochilganda 404 bo'lmaydi.
+    "not_found_handling": "single-page-application"
+  }
+}
