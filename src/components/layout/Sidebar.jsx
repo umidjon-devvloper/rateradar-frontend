@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, TrendingUp, MessageSquare, Sparkles,
-  Settings, Globe, Shield, X, BookOpen, Zap, Map, Bell, ConciergeBell,
+  Settings, Globe, Shield, X, BookOpen, Map, Bell, ConciergeBell,
   ChevronRight, CreditCard, ShieldAlert,
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
@@ -87,7 +87,6 @@ export function Sidebar({ mobileOpen, collapsed, onClose }) {
             { to: '/competitors', icon: Users, label: t('competitors') },
             { to: '/prices', icon: TrendingUp, label: t('rateShopper') },
             { to: '/ota-channels', icon: Globe, label: t('otaChannels') },
-            { to: '/xotelo', icon: Zap, label: t('freePrices') },
             { to: '/rating-map', icon: Map, label: t('ratingMap') },
           ],
         },

@@ -25,10 +25,12 @@ import CountUp from '@/components/ui/CountUp';
 import { Stagger, StaggerItem, Reveal } from '@/components/ui/motion';
 import PriceRefreshProgress from '@/components/PriceRefreshProgress';
 import InstantSnapshotCard from '@/components/InstantSnapshotCard';
+import AiAdvisor from '@/components/AiAdvisor';
 import { hotelApi, pricesApi } from '@/lib/api';
 import { useT, useLang } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { useFormatPrice, cn } from '@/lib/utils';
+import { getCache, setCache } from '@/lib/clientCache';
 
 export default function Dashboard() {
   const t = useT();
@@ -44,20 +46,38 @@ export default function Dashboard() {
   const [forecast, setForecast] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
 
+  // Raqiblar — keshdan darrov (stale-while-revalidate). Competitors sahifasi
+  // bilan bir xil kalit (`competitors:<id>`) — sahifalar orasida o'tishda
+  // qayta backendga ketmaydi, kesh ulashiladi.
   useEffect(() => {
+    const key = hotel?._id ? `competitors:${hotel._id}` : null;
+    const cached = key ? getCache(key, 6 * 3600_000) : null; // 6 soat
+    if (cached) {
+      setCompetitors(cached);
+      setLoading(false);
+    }
     hotelApi
       .competitors()
-      .then((c) => setCompetitors(c || []))
+      .then((c) => {
+        setCompetitors(c || []);
+        if (key) setCache(key, c || []);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [hotel?._id]);
 
-  // 14 kunlik narx prognozi — bizning hotel va bozor o'rtachasi
+  // 14 kunlik narx prognozi — bizning hotel va bozor o'rtachasi (keshlangan)
   useEffect(() => {
     if (!hotel?._id) return;
+    const key = `forecast:${hotel._id}`;
+    const cached = getCache(key, 6 * 3600_000);
+    if (cached) setForecast(cached);
     pricesApi
       .rateShopper(14, 'all')
-      .then(setForecast)
-      .catch(() => setForecast(null));
+      .then((f) => {
+        setForecast(f);
+        setCache(key, f);
+      })
+      .catch(() => {});
   }, [hotel?._id]);
 
   // Grafik ma'lumotlari: har bir kun uchun [data, sizning narx, bozor avg]
@@ -406,7 +426,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Two-column section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Cheapest / Expensive */}
         <Card variant="glass" className="hover-lift">
           <CardHeader>
@@ -460,24 +480,12 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* AI insights placeholder */}
-        <Card variant="premium" className="hover-lift bg-gradient-to-br from-primary/5 via-card to-fuchsia-500/5">
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              {t('aiAnalysis')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {t('aiPlaceholder')}
-            </p>
-            <Badge variant="outline" className="mt-3">
-              Phase 3
-            </Badge>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* AI Maslahatchi — narx/statistikaga qarab tavsiyalar (xizmat qo'shish,
+          hotel-service'ga ulanish va h.k.). Competitors sahifasi bilan bir xil
+          kesh kalitidan (`ai:<id>:<lang>`) foydalanadi. */}
+      <AiAdvisor hotel={hotel} />
 
     </div>
   );

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useT, useLang } from '@/lib/i18n';
 import { notificationApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { getCache, setCache } from '@/lib/clientCache';
 
 const TYPE_ICON = {
   competitor_below: TrendingDown,
@@ -68,12 +69,23 @@ export default function Notifications() {
   const [filter, setFilter] = useState('all'); // all | unread
   const [markingAll, setMarkingAll] = useState(false);
 
+  // Stale-while-revalidate: keshdan darrov ko'rsatamiz (TTL qisqa — bildirishnoma
+  // tez o'zgaradi), orqa fonda yangilab unread sonini aniqlaymiz.
   async function load() {
-    setLoading(true);
+    const key = hotel?._id ? `notifications:${hotel._id}` : null;
+    const cached = key ? getCache(key, 5 * 60_000) : null; // 5 daqiqa
+    if (cached) {
+      setNotifications(cached.notifications || []);
+      setUnreadCount(cached.unreadCount || 0);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     try {
       const data = await notificationApi.list();
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
+      if (key) setCache(key, data);
     } finally {
       setLoading(false);
     }

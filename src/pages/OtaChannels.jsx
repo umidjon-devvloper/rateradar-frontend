@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useT, useLang } from '@/lib/i18n';
 import { hotelApi } from '@/lib/api';
 import { cn, formatPrice } from '@/lib/utils';
+import { getCache, setCache } from '@/lib/clientCache';
 import { getOtaBrand } from '@/lib/otaBrands';
 
 // "Fetched from X via Y" yorlig'i - qaysi tashqi API'dan kelgan
@@ -48,18 +49,22 @@ export default function OtaChannels() {
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
 
+  // Stale-while-revalidate: keshdan darrov, orqa fonda yangilaymiz.
   async function load() {
-    setLoading(true);
+    const hid = localStorage.getItem('rr_active_hotel_id') || 'me';
+    const key = `otaPage:${hid}`;
+    const cached = getCache(key, 6 * 3600_000); // 6 soat
+    if (cached) { setData(cached); setLoading(false); } else { setLoading(true); }
     setError('');
     try {
       // Lite rejim — faqat saqlangan ma'lumotlar (xotelo + manual + kesh).
       // SerpAPI va Apify chaqirilmaydi. Foydalanuvchi kerakli kanalga
       // tepadagi tugmalar orqali alohida so'rov yuboradi.
       const res = await hotelApi.otaChannels({ lite: true });
-      console.log('OTA Channels:', res);
       setData(res);
+      setCache(key, res);
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      if (!cached) setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }

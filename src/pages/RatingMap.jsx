@@ -10,6 +10,7 @@ import CompetitorMap from '@/components/CompetitorMap';
 import { hotelApi, pricesApi } from '@/lib/api';
 import { useT, useLang } from '@/lib/i18n';
 import { useFormatPrice, cn } from '@/lib/utils';
+import { getCache, setCache } from '@/lib/clientCache';
 
 function getCompPrice(c) {
   const m = c.latestPrices;
@@ -32,23 +33,31 @@ export default function RatingMap() {
   const [catLoading, setCatLoading] = useState(true);
 
   async function loadCategoryRatings(refresh = false) {
-    setCatLoading(true);
+    const key = hotel?._id ? `catRatings:${hotel._id}` : null;
+    // refresh=true bo'lsa keshni e'tiborsiz qoldiramiz (qayta hisoblash).
+    const cached = !refresh && key ? getCache(key, 12 * 3600_000) : null; // 12 soat
+    if (cached) { setCatRatings(cached); setCatLoading(false); } else { setCatLoading(true); }
     try {
       const res = await hotelApi.categoryRatings(refresh);
       setCatRatings(res);
+      if (key) setCache(key, res);
     } catch (err) {
       console.warn('Kategoriya reytinglari yuklanmadi:', err.message);
-      setCatRatings({ configured: false, categories: [] });
+      if (!cached) setCatRatings({ configured: false, categories: [] });
     } finally {
       setCatLoading(false);
     }
   }
 
+  // Raqiblar — Dashboard/Competitors bilan bir xil kesh kaliti (`competitors:<id>`).
   async function load() {
-    setLoading(true);
+    const key = hotel?._id ? `competitors:${hotel._id}` : null;
+    const cached = key ? getCache(key, 6 * 3600_000) : null; // 6 soat
+    if (cached) { setCompetitors(cached); setLoading(false); } else { setLoading(true); }
     try {
       const list = await hotelApi.competitors();
       setCompetitors(list || []);
+      if (key) setCache(key, list || []);
     } catch (err) {
       console.warn('Raqiblar yuklanmadi:', err.message);
     } finally {
@@ -70,7 +79,7 @@ export default function RatingMap() {
     }
   }
 
-  useEffect(() => { load(); loadCategoryRatings(); }, []);
+  useEffect(() => { load(); loadCategoryRatings(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [hotel?._id]);
 
   // Narxli raqiblar
   const compsWithPrice = useMemo(

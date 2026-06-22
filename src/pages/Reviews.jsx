@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useT, useLang } from '@/lib/i18n';
 import { reviewApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { getCache, setCache } from '@/lib/clientCache';
 import { getOtaBrand } from '@/lib/otaBrands';
 
 const AVATAR_COLORS = [
@@ -71,13 +72,19 @@ export default function Reviews() {
   const [scrapeMsg, setScrapeMsg] = useState('');
   const [selected, setSelected] = useState(null);
 
+  // Stale-while-revalidate: keshdan darrov, orqa fonda yangilaymiz.
+  // Aktiv hotel id'ni kalitga qo'shamiz (mehmonxonalar orasida aralashmasin).
   async function load() {
-    setLoading(true);
+    const hid = localStorage.getItem('rr_active_hotel_id') || 'me';
+    const key = `reviews:${hid}:${filter}`;
+    const cached = getCache(key, 30 * 60_000); // 30 daqiqa
+    if (cached) { setData(cached); setLoading(false); } else { setLoading(true); }
     try {
       const params = {};
       if (filter !== 'all') params.sentiment = filter;
       const res = await reviewApi.list(params);
       setData(res);
+      setCache(key, res);
     } finally {
       setLoading(false);
     }

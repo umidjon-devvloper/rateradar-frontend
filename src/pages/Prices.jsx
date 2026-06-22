@@ -12,6 +12,7 @@ import { cellPop } from '@/lib/animations';
 import { useT, useLang } from '@/lib/i18n';
 import { pricesApi } from '@/lib/api';
 import { cn, useFormatPrice } from '@/lib/utils';
+import { getCache, setCache } from '@/lib/clientCache';
 import { getOtaBrand } from '@/lib/otaBrands';
 
 const DAY_OPTIONS = [
@@ -344,27 +345,34 @@ export default function Prices() {
     }
   }
 
+  // Stale-while-revalidate: keshdan darrov ko'rsatamiz, orqa fonda yangilaymiz.
   async function loadRooms(d = days) {
-    setLoading(true);
+    const key = hotel?._id ? `priceRooms:${hotel._id}:${d}` : null;
+    const cached = key ? getCache(key, 6 * 3600_000) : null; // 6 soat
+    if (cached) { setRoomData(cached); setLoading(false); } else { setLoading(true); }
     setError('');
     try {
       const res = await pricesApi.roomShopper(d);
       setRoomData(res);
+      if (key) setCache(key, res);
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Xato');
+      if (!cached) setError(err.response?.data?.error || err.message || 'Xato');
     } finally {
       setLoading(false);
     }
   }
 
   async function loadCompetitors(d = days, ch = channel) {
-    setLoading(true);
+    const key = hotel?._id ? `priceComp:${hotel._id}:${d}:${ch}` : null;
+    const cached = key ? getCache(key, 6 * 3600_000) : null;
+    if (cached) { setCompData(cached); setLoading(false); } else { setLoading(true); }
     setError('');
     try {
       const res = await pricesApi.rateShopper(d, ch);
       setCompData(res);
+      if (key) setCache(key, res);
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Xato');
+      if (!cached) setError(err.response?.data?.error || err.message || 'Xato');
     } finally {
       setLoading(false);
     }

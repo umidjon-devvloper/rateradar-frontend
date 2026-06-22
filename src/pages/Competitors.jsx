@@ -4,7 +4,7 @@ import {
   Plus, MapPin, Star, Trash2, Loader2, Building2, X,
   RefreshCw, DollarSign, Clock,
   ChevronRight, BarChart2, Mail, Map, List,
-  MessageSquare, ExternalLink, DownloadCloud, Sparkles, Lightbulb, ArrowRight,
+  MessageSquare, ExternalLink, DownloadCloud,
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -17,8 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SearchSelect } from '@/components/ui/search-select';
 import CompetitorMap from '@/components/CompetitorMap';
-import { hotelApi, searchApi, aiApi } from '@/lib/api';
-import { useT, useLang } from '@/lib/i18n';
+import AiAdvisor from '@/components/AiAdvisor';
+import { hotelApi, searchApi } from '@/lib/api';
+import { useT } from '@/lib/i18n';
 import { cn, useFormatPrice } from '@/lib/utils';
 import { getOtaBrand } from '@/lib/otaBrands';
 import { getCache, setCache, clearCache, clearCachePrefix } from '@/lib/clientCache';
@@ -623,7 +624,6 @@ function CompetitorDetailModal({ comp, myPrice, onClose, onFetchPrice }) {
 // ─── Main ─────────────────────────────────────────────
 export default function Competitors() {
   const t = useT();
-  const lang = useLang((s) => s.lang);
   const { hotel } = useOutletContext();
   const [competitors, setCompetitors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -635,32 +635,6 @@ export default function Competitors() {
   const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, active: false });
   const [detailComp, setDetailComp] = useState(null);
   const [viewMode, setViewMode] = useState('table'); // 'table' | 'map'
-  // AI maslahatchi (sahifa tagida)
-  const [aiData, setAiData] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState('');
-  const aiLoadedRef = useRef(false);
-
-  // force=true — "Yangilash" bosilganda AI'ga qayta so'rov (token sarflanadi).
-  // force=false — keshdan oladi (token ketmaydi); kesh bo'lmasa bir marta generatsiya.
-  const loadAi = useCallback(async (force = false) => {
-    const cacheKey = `ai:${hotel?._id}:${lang}`;
-    if (!force) {
-      const cached = getCache(cacheKey, 12 * 3600_000); // 12 soat
-      if (cached) { setAiData(cached); return; } // keshdan — so'rov yubormaymiz
-    }
-    setAiLoading(true);
-    setAiError('');
-    try {
-      const res = await aiApi.priceRecommendations(lang, force);
-      setAiData(res);
-      setCache(cacheKey, res);
-    } catch (err) {
-      setAiError(err.response?.data?.error || err.message);
-    } finally {
-      setAiLoading(false);
-    }
-  }, [lang, hotel?._id]);
   // Avto Xotelo-enrich har sahifa ochilishida bir martagina ishlasin (qayta navigatsiya zarariga yo'l qo'ymaslik).
   const xoteloAutoFetched = useRef(false);
 
@@ -690,14 +664,6 @@ export default function Competitors() {
   }, [hotel?._id]);
 
   useEffect(() => { load(); }, [load]);
-
-  // Raqiblar yuklangach, AI maslahatni bir marta avtomatik olamiz.
-  useEffect(() => {
-    if (aiLoadedRef.current) return;
-    if (loading || !competitors.length || !hotel?._id) return;
-    aiLoadedRef.current = true;
-    loadAi();
-  }, [loading, competitors.length, hotel?._id, loadAi]);
 
   // Foydalanuvchining shaxsiy hoteli uchun OTA kanal narxlarini olamiz
   // (Booking, Agoda, Hotels.com …) — raqiblar kartasi bilan bir xil ko'rinishda.
@@ -1087,15 +1053,7 @@ export default function Competitors() {
       )}
 
       {/* AI maslahatchi — sahifa tagida */}
-      {competitors.length > 0 && (
-        <AiAdvisor
-          data={aiData}
-          loading={aiLoading}
-          error={aiError}
-          onRefresh={() => loadAi(true)}
-          lang={lang}
-        />
-      )}
+      {competitors.length > 0 && <AiAdvisor hotel={hotel} />}
 
       {/* Detail Modal */}
       {detailComp && (
@@ -1110,109 +1068,3 @@ export default function Competitors() {
   );
 }
 
-// ─── AI Maslahatchi paneli ─────────────────────────────
-function AiAdvisor({ data, loading, error, onRefresh, lang }) {
-  const formatPrice = useFormatPrice();
-  const L = (uz, ru, en) => (lang === 'uz' ? uz : lang === 'ru' ? ru : en);
-  const recs = data?.recommendations || [];
-
-  return (
-    <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/[0.04] to-fuchsia-500/[0.03]">
-      <div className="px-5 py-3.5 border-b border-border/60 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-fuchsia-500 text-white flex items-center justify-center shrink-0">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold">
-              {L('AI Maslahatchi', 'AI Советник', 'AI Advisor')}
-            </div>
-            <div className="text-[11px] text-muted-foreground">
-              {L('Raqiblar narxiga qarab tavsiyalar', 'Рекомендации по ценам конкурентов', 'Recommendations based on competitor pricing')}
-            </div>
-          </div>
-        </div>
-        <Button variant="outline" size="sm" onClick={onRefresh} disabled={loading}>
-          {loading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
-          {L('Yangilash', 'Обновить', 'Refresh')}
-        </Button>
-      </div>
-
-      <CardContent className="p-5">
-        {loading && !recs.length ? (
-          <div className="py-10 flex flex-col items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-xs text-muted-foreground">
-              {L('AI tahlil qilmoqda...', 'AI анализирует...', 'AI is analyzing...')}
-            </p>
-          </div>
-        ) : error ? (
-          <div className="py-8 text-center">
-            <p className="text-sm text-muted-foreground">{error}</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={onRefresh}>
-              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-              {L('Qayta urinish', 'Повторить', 'Retry')}
-            </Button>
-          </div>
-        ) : recs.length === 0 ? (
-          <div className="py-8 text-center text-sm text-muted-foreground">
-            {L('Hozircha tavsiya yo\'q. Raqiblar narxini yangilab, qayta urinib ko\'ring.',
-               'Пока нет рекомендаций. Обновите цены конкурентов.',
-               'No recommendations yet. Refresh competitor prices and try again.')}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {data?.summary && (
-              <div className="flex items-start gap-2.5 text-sm bg-card/60 border border-border/60 rounded-xl p-3.5">
-                <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                <p className="leading-relaxed">{data.summary}</p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              {recs.map((r, i) => (
-                <div key={i} className="rounded-xl border border-border/60 bg-card/70 p-4 flex flex-col">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-5 h-5 rounded-md bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0">
-                      {r.priority || i + 1}
-                    </span>
-                    <h4 className="text-sm font-semibold leading-tight">{r.title}</h4>
-                  </div>
-                  {r.description && (
-                    <p className="text-xs text-muted-foreground leading-relaxed flex-1">{r.description}</p>
-                  )}
-                  {(r.currentPrice > 0 || r.suggestedPrice > 0) && (
-                    <div className="flex items-center gap-2 mt-3 text-sm font-semibold tabular-nums">
-                      {r.currentPrice > 0 && <span className="text-muted-foreground line-through">{formatPrice(r.currentPrice)}</span>}
-                      {r.suggestedPrice > 0 && (
-                        <>
-                          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-emerald-600 dark:text-emerald-400">{formatPrice(r.suggestedPrice)}</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
-                    {r.platform && (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                        {r.platform}
-                      </span>
-                    )}
-                    {r.expectedImpact && (
-                      <span className="text-[10px] text-muted-foreground">{r.expectedImpact}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              {L('AI tomonidan yaratilgan — yakuniy qarorni o\'zingiz qabul qiling',
-                 'Сгенерировано ИИ — окончательное решение за вами',
-                 'AI-generated — final decision is yours')}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
