@@ -38,6 +38,7 @@ export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
+        
         {/* Public — landing va auth */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
