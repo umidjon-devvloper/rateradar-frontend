@@ -4,7 +4,7 @@ import {
   Users, Building2, Database, MessageSquare, TrendingUp,
   ExternalLink, AlertCircle, CheckCircle2, RefreshCw,
   Shield, Globe, Sparkles, MapPin, Activity, Send, Loader2,
-  Lightbulb, Search, DollarSign,
+  Lightbulb, Search, DollarSign, CreditCard,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,21 +41,24 @@ export default function Admin() {
   const [apiStats, setApiStats] = useState(null);
   const [users, setUsers] = useState(null);
   const [active, setActive] = useState(null);
+  const [txns, setTxns] = useState(null);
   const [loading, setLoading] = useState(false);
 
   async function loadAll() {
     setLoading(true);
     try {
-      const [d, s, u, a] = await Promise.all([
+      const [d, s, u, a, t] = await Promise.all([
         adminApi.dashboard().catch(() => null),
         adminApi.apiStats().catch(() => null),
         adminApi.users({ limit: 50 }).catch(() => null),
         adminApi.activeUsers().catch(() => null),
+        adminApi.transactions({ limit: 50 }).catch(() => null),
       ]);
       setDashboard(d);
       setApiStats(s);
       setUsers(u);
       setActive(a);
+      setTxns(t);
     } finally {
       setLoading(false);
     }
@@ -68,6 +71,7 @@ export default function Admin() {
     { id: 'apis',     label: 'API Limitlar', icon: Database },
     { id: 'users',    label: 'Foydalanuvchilar', icon: Users },
     { id: 'active',   label: 'Faol foydalanuvchilar', icon: Shield },
+    { id: 'txns',     label: 'Tranzaksiyalar', icon: CreditCard },
     { id: 'broadcast',label: 'Xabarnoma', icon: Send },
   ];
 
@@ -119,6 +123,7 @@ export default function Admin() {
       {tab === 'apis'     && <ApiStatsTab apiStats={apiStats} />}
       {tab === 'users'    && <UsersTab users={users} reload={loadAll} />}
       {tab === 'active'   && <ActiveTab active={active} />}
+      {tab === 'txns'     && <TransactionsTab initial={txns} />}
       {tab === 'broadcast'&& <BroadcastTab />}
     </div>
   );
@@ -511,6 +516,144 @@ function ActiveTab({ active }) {
             {!active.active?.length && (
               <div className="px-6 py-12 text-center text-sm text-muted-foreground">
                 Hech kim hozircha aktiv emas
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// To'lov holatlari uchun yorliq + rang
+const TXN_STATUS = {
+  paid:     { label: "To'langan",      cls: 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' },
+  otp_sent: { label: 'OTP yuborilgan', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300' },
+  created:  { label: 'Yaratilgan',     cls: 'bg-muted text-muted-foreground' },
+  failed:   { label: 'Xato',           cls: 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300' },
+  reversed: { label: 'Qaytarilgan',    cls: 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300' },
+};
+
+// Tiyin → so'm (1 so'm = 100 tiyin), o'zbekcha ming-ajratuvchi bilan.
+function tiyinToUzs(tiyin) {
+  return (Number(tiyin || 0) / 100).toLocaleString('ru-RU');
+}
+
+function TransactionsTab({ initial }) {
+  const [data, setData] = useState(initial);
+  const [status, setStatus] = useState('');
+  const [plan, setPlan] = useState('');
+  const [channel, setChannel] = useState('');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await adminApi.transactions({
+        limit: 50,
+        status: status || undefined,
+        plan: plan || undefined,
+        channel: channel || undefined,
+        search: search.trim() || undefined,
+      });
+      setData(res);
+    } catch {
+      /* xato — eski ma'lumot qoladi */
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Filtr o'zgarsa qayta yuklash (qidiruvdan tashqari — u Enter/tugma bilan)
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [status, plan, channel]);
+
+  if (!data) {
+    return <div className="text-sm text-muted-foreground py-8 text-center">Yuklanmoqda...</div>;
+  }
+
+  const byStatus = data.summary?.byStatus || {};
+  const inputCls = 'rounded-md border border-input bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/40';
+
+  return (
+    <div className="space-y-4">
+      {/* Summary kartalari */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <CountCard icon={DollarSign} label="Jami tushum (so'm)" value={tiyinToUzs(data.summary?.paidRevenue)} accent="green" />
+        <CountCard icon={CheckCircle2} label="To'langan" value={byStatus.paid?.count || 0} accent="primary" />
+        <CountCard icon={Loader2} label="OTP kutilmoqda" value={byStatus.otp_sent?.count || 0} />
+        <CountCard icon={AlertCircle} label="Xato" value={byStatus.failed?.count || 0} />
+      </div>
+
+      {/* Filtrlar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <select className={inputCls} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="">Barcha holatlar</option>
+          {Object.entries(TXN_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+        </select>
+        <select className={inputCls} value={plan} onChange={(e) => setPlan(e.target.value)}>
+          <option value="">Barcha rejalar</option>
+          <option value="starter">Starter</option>
+          <option value="pro">Pro</option>
+        </select>
+        <select className={inputCls} value={channel} onChange={(e) => setChannel(e.target.value)}>
+          <option value="">Barcha kanallar</option>
+          <option value="card">Karta (SMS-OTP)</option>
+          <option value="invoice">To'lov sahifasi</option>
+        </select>
+        <div className="flex items-center gap-1">
+          <input
+            className={inputCls}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && load()}
+            placeholder="Email / ism / karta..."
+          />
+          <Button size="sm" variant="outline" className="h-8" onClick={load} disabled={loading}>
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Tranzaksiyalar ({data.total})</CardTitle>
+        </CardHeader>
+        <CardContent className="px-0">
+          <div className="divide-y">
+            {(data.transactions || []).map((t) => {
+              const st = TXN_STATUS[t.status] || { label: t.status, cls: 'bg-muted text-muted-foreground' };
+              return (
+                <div key={t._id} className="px-6 py-3 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm truncate">{t.user?.name || '—'}</span>
+                      <Badge variant="secondary" className="text-[10px] capitalize">{t.plan}</Badge>
+                      <Badge variant="outline" className="text-[10px]">
+                        {t.channel === 'invoice' ? 'Sahifa' : 'Karta'}
+                      </Badge>
+                      <Badge className={cn('text-[10px] border-transparent', st.cls)}>{st.label}</Badge>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {t.user?.email || '—'}
+                      {t.cardPan ? ` • ${t.cardPan}` : ''}
+                      {t.errorMessage ? ` • ${t.errorMessage}` : ''}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-semibold tabular-nums whitespace-nowrap">
+                      {tiyinToUzs(t.amount)} so'm
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(t.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {!data.transactions?.length && (
+              <div className="px-6 py-12 text-center text-sm text-muted-foreground">
+                Tranzaksiyalar topilmadi
               </div>
             )}
           </div>

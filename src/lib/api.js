@@ -132,6 +132,8 @@ export const adminApi = {
   toggleUser: (id) =>
     api.patch(`/admin/users/${id}/toggle`).then((r) => r.data),
   apiStats: () => api.get("/admin/api-stats").then((r) => r.data),
+  transactions: (params) =>
+    api.get("/admin/transactions", { params }).then((r) => r.data),
   broadcast: (data) => api.post("/admin/broadcast", data).then((r) => r.data),
 };
 

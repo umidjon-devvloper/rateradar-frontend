@@ -44,7 +44,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Mehmon (QR) oqimi — ommaviy, to'liq ekran (RateRadar shell'isiz) */}
-        <Route path="/hotel-service/g/*" element={<HotelServiceGuest />} />
+        <Route path="/hotel-service/g/*" element={<HotelServiceGuest />} /> 
 
         {/* Auth required, lekin onboarding shart emas */}
         <Route

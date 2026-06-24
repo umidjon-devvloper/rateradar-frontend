@@ -81,7 +81,7 @@ export default function Landing() {
       id: 'starter',
       title: t('planStarterTitle'),
       desc: t('planStarterDesc'),
-      priceUzs: 99000,
+      priceUzs: 1000, // TEST: vaqtincha 1000 so'm. ASLI: 99000
       features: [
         t('planStarterFeat1'),
         t('planStarterFeat2'),
@@ -95,7 +95,7 @@ export default function Landing() {
       id: 'pro',
       title: t('planProTitle'),
       desc: t('planProDesc'),
-      priceUzs: 199000,
+      priceUzs: 1000, // TEST: vaqtincha 1000 so'm. ASLI: 199000
       features: [
         t('planProFeat1'),
         t('planProFeat2'),
