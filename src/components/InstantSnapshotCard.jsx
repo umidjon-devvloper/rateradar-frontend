@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, RefreshCw, TrendingUp, TrendingDown, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Zap, RefreshCw, TrendingUp, TrendingDown, ArrowRight, AlertTriangle, ChevronDown } from 'lucide-react';
 import { hotelApi } from '@/lib/api';
 import { useLang } from '@/lib/i18n';
 import { useFormatPrice, cn } from '@/lib/utils';
@@ -74,6 +74,18 @@ export default function InstantSnapshotCard() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
+  // Yig'iladigan (collapsible) — holat eslab qolinadi. Yopilsa, pastdagi
+  // grafik/raqib kartalari tezroq ko'rinadi (kam scroll).
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem('rr_snapshot_collapsed') === 'true'
+  );
+  function toggleCollapsed() {
+    setCollapsed((v) => {
+      const next = !v;
+      try { localStorage.setItem('rr_snapshot_collapsed', String(next)); } catch {}
+      return next;
+    });
+  }
 
   const run = useCallback(async () => {
     setLoading(true);
@@ -108,29 +120,50 @@ export default function InstantSnapshotCard() {
 
   return (
     <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/5 via-card to-card p-5 sm:p-6">
-      {/* Sarlavha */}
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+      {/* Sarlavha — bosilsa yig'iladi/ochiladi */}
+      <div className={cn('flex items-start justify-between gap-3', collapsed ? 'mb-0' : 'mb-4')}>
+        <button onClick={toggleCollapsed} className="flex items-center gap-3 min-w-0 text-left flex-1">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <Zap className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground">{t.title}</h3>
               <span className="text-[10px] font-bold text-success bg-success/10 px-1.5 py-0.5 rounded">{t.free}</span>
             </div>
-            <p className="text-xs text-muted-foreground">{t.sub}</p>
+            {/* Yopilganda qisqa xulosa, ochiqda tavsif */}
+            {collapsed && hasOwn ? (
+              <p className="text-xs text-muted-foreground truncate">
+                {t.myPrice}: <span className="font-semibold text-primary">{usd(myBest)}</span>
+                {hasComp && <> · {t.marketAvg}: {usd(s.marketAvg)} · {s.position}/{s.total}</>}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t.sub}</p>
+            )}
           </div>
-        </div>
-        <button
-          onClick={run}
-          disabled={loading}
-          className="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
-          {t.retry}
         </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={run}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
+            {!collapsed && t.retry}
+          </button>
+          <button
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? 'Ochish' : "Yig'ish"}
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          >
+            <ChevronDown className={cn('h-4 w-4 transition-transform', collapsed ? '' : 'rotate-180')} />
+          </button>
+        </div>
       </div>
+
+      {!collapsed && (
+      <>
+      {/* ── Tana (yopilganda ko'rinmaydi) ── */}
 
       {/* Loading */}
       {loading && (
@@ -204,6 +237,8 @@ export default function InstantSnapshotCard() {
         <button onClick={run} className="text-sm text-primary font-medium hover:underline">
           {t.retry} →
         </button>
+      )}
+      </>
       )}
     </div>
   );
