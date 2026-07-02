@@ -9,6 +9,7 @@ import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
+import Offer from '@/pages/Offer';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Onboarding from '@/pages/Onboarding';
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/offer" element={<Offer />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 

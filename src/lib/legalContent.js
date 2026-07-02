@@ -112,6 +112,64 @@ const uz = {
       },
     ],
   },
+  offer: {
+    title: 'Ommaviy oferta',
+    updated: "Oxirgi yangilanish: 2026-yil 2-iyul",
+    intro:
+      "Ushbu hujjat O'zbekiston Respublikasi Fuqarolik kodeksining 367–369-moddalariga muvofiq ommaviy oferta (ochiq taklif) hisoblanadi. TheHotelSaaS (RateRadar) platformasidan foydalanish yoki to'lovni amalga oshirish orqali Foydalanuvchi quyidagi shartlarni to'liq va so'zsiz qabul qiladi (aksept).",
+    sections: [
+      {
+        h: '1. Atamalar',
+        list: [
+          "Ijrochi — platformani taqdim etuvchi tomon (rekvizitlar quyida keltirilgan).",
+          "Foydalanuvchi — platformadan foydalanuvchi yoki to'lovni amalga oshiruvchi jismoniy/yuridik shaxs.",
+          "Xizmat — mehmonxonalar uchun narx monitoringi, reyting tahlili va daromad boshqaruvi obunasi.",
+          "Aksept — Foydalanuvchi tomonidan ushbu oferta shartlarini to'liq qabul qilinishi (to'lov yoki ro'yxatdan o'tish orqali).",
+        ],
+      },
+      {
+        h: '2. Oferta predmeti',
+        p: "Ijrochi Foydalanuvchiga tanlangan tarif rejasiga muvofiq platformadan foydalanish (obuna) xizmatini taqdim etadi, Foydalanuvchi esa uni belgilangan tartibda to'laydi.",
+      },
+      {
+        h: '3. Xizmat narxi va to\'lov tartibi',
+        p: "Xizmat narxi platformadagi tarif rejasida (Billing bo'limida) ko'rsatiladi va O'zbekiston so'mida belgilanadi. To'lovlar ATMOS to'lov shlyuzi orqali UzCard, Humo, Visa va Mastercard kartalari bilan onlayn amalga oshiriladi. To'lov Foydalanuvchi tomonidan aksept qilingandan so'ng obuna faollashadi. Ijrochi karta ma'lumotlarini (raqam, CVV) saqlamaydi — ular ATMOS xavfsiz muhitida qayta ishlanadi.",
+      },
+      {
+        h: '4. Tomonlarning huquq va majburiyatlari',
+        list: [
+          "Ijrochi xizmatni uzluksiz taqdim etishga va texnik yordam ko'rsatishga harakat qiladi.",
+          "Foydalanuvchi to'g'ri ma'lumot berishi va xizmatdan qonuniy maqsadlarda foydalanishi shart.",
+          "Ijrochi profilaktika yoki fors-major holatlarida xizmatni vaqtincha to'xtatish huquqiga ega.",
+        ],
+      },
+      {
+        h: '5. Pulni qaytarish (refund)',
+        p: "Foydalanuvchi obunani istalgan vaqtda bekor qilishi mumkin; u joriy hisob-kitob davri oxirigacha amal qiladi. Xizmat ko'rsatilmagan yoki noto'g'ri hisoblangan hollarda pulni qaytarish uchun info@thehotelsaas.com manziliga murojaat qilinadi; ariza 10 ish kuni ichida ko'rib chiqiladi va mablag' to'lov qilingan kartaga qaytariladi.",
+      },
+      {
+        h: '6. Javobgarlik',
+        p: "Xizmat \"borligicha\" (as is) taqdim etiladi. Ijrochi uchinchi tomon (OTA) ma'lumotlarining to'liq aniqligini kafolatlamaydi va ulardan foydalanish natijasidagi bilvosita zararlar uchun javobgar emas. Tomonlar O'zbekiston Respublikasi qonunchiligiga muvofiq javobgar bo'ladilar.",
+      },
+      {
+        h: '7. Nizolarni hal qilish',
+        p: "Barcha nizolar muzokaralar yo'li bilan hal qilinadi. Kelishuvga erishilmasa, nizo O'zbekiston Respublikasining amaldagi qonunchiligiga muvofiq sud tartibida ko'rib chiqiladi.",
+      },
+      {
+        h: '8. Amal qilish muddati',
+        p: "Oferta platformada e'lon qilingan paytdan boshlab amal qiladi va yangi tahriri joylashtirilgunga qadar kuchda bo'ladi. Ijrochi ofertaga o'zgartirish kiritish huquqini o'zida saqlaydi.",
+      },
+      {
+        h: '9. Ijrochi rekvizitlari',
+        list: [
+          "Tashkilot nomi: DENDI PLAZA",
+          "STIR (INN): 300717633",
+          "Manzil: Buxoro shahri, Islom Karimov ko'chasi",
+          "Email: info@thehotelsaas.com",
+        ],
+      },
+    ],
+  },
 };
 
 const ru = {
@@ -213,6 +271,64 @@ const ru = {
       },
     ],
   },
+  offer: {
+    title: 'Публичная оферта',
+    updated: 'Последнее обновление: 2 июля 2026 г.',
+    intro:
+      'Настоящий документ является публичной офертой в соответствии со статьями 367–369 Гражданского кодекса Республики Узбекистан. Используя платформу TheHotelSaaS (RateRadar) или совершая оплату, Пользователь полностью и безоговорочно принимает нижеследующие условия (акцепт).',
+    sections: [
+      {
+        h: '1. Термины',
+        list: [
+          'Исполнитель — сторона, предоставляющая платформу (реквизиты указаны ниже).',
+          'Пользователь — физическое или юридическое лицо, использующее платформу или совершающее оплату.',
+          'Услуга — подписка на мониторинг цен, анализ рейтингов и управление доходом для отелей.',
+          'Акцепт — полное принятие Пользователем условий настоящей оферты (через оплату или регистрацию).',
+        ],
+      },
+      {
+        h: '2. Предмет оферты',
+        p: 'Исполнитель предоставляет Пользователю услугу использования платформы (подписку) согласно выбранному тарифному плану, а Пользователь оплачивает её в установленном порядке.',
+      },
+      {
+        h: '3. Стоимость услуги и порядок оплаты',
+        p: 'Стоимость услуги указывается в тарифном плане на платформе (раздел Billing) и устанавливается в узбекских сумах. Оплата производится онлайн через платёжный шлюз ATMOS картами UzCard, Humo, Visa и Mastercard. Подписка активируется после акцепта (оплаты). Исполнитель не хранит данные карты (номер, CVV) — они обрабатываются в защищённой среде ATMOS.',
+      },
+      {
+        h: '4. Права и обязанности сторон',
+        list: [
+          'Исполнитель стремится предоставлять услугу непрерывно и оказывать техническую поддержку.',
+          'Пользователь обязан предоставлять достоверные данные и использовать сервис в законных целях.',
+          'Исполнитель вправе временно приостановить услугу при профилактике или форс-мажоре.',
+        ],
+      },
+      {
+        h: '5. Возврат средств',
+        p: 'Пользователь может отменить подписку в любое время; она действует до конца текущего расчётного периода. При неоказании услуги или ошибочном списании для возврата следует обратиться на info@thehotelsaas.com; заявление рассматривается в течение 10 рабочих дней, средства возвращаются на карту оплаты.',
+      },
+      {
+        h: '6. Ответственность',
+        p: 'Услуга предоставляется «как есть» (as is). Исполнитель не гарантирует полную точность данных третьих сторон (OTA) и не несёт ответственности за косвенный ущерб от их использования. Стороны несут ответственность в соответствии с законодательством Республики Узбекистан.',
+      },
+      {
+        h: '7. Разрешение споров',
+        p: 'Все споры разрешаются путём переговоров. При недостижении согласия спор рассматривается в судебном порядке согласно действующему законодательству Республики Узбекистан.',
+      },
+      {
+        h: '8. Срок действия',
+        p: 'Оферта действует с момента её публикации на платформе и до размещения новой редакции. Исполнитель оставляет за собой право вносить изменения в оферту.',
+      },
+      {
+        h: '9. Реквизиты Исполнителя',
+        list: [
+          'Наименование организации: DENDI PLAZA',
+          'ИНН (STIR): 300717633',
+          'Адрес: г. Бухара, ул. Ислама Каримова',
+          'Email: info@thehotelsaas.com',
+        ],
+      },
+    ],
+  },
 };
 
 const en = {
@@ -311,6 +427,64 @@ const en = {
       {
         h: '6. Your rights',
         p: 'You have the right to access, correct or request deletion of your data. To do so, contact info@thehotelsaas.com.',
+      },
+    ],
+  },
+  offer: {
+    title: 'Public Offer',
+    updated: 'Last updated: July 2, 2026',
+    intro:
+      'This document constitutes a public offer under Articles 367–369 of the Civil Code of the Republic of Uzbekistan. By using the TheHotelSaaS (RateRadar) platform or making a payment, the User fully and unconditionally accepts the following terms (acceptance).',
+    sections: [
+      {
+        h: '1. Definitions',
+        list: [
+          'Provider — the party offering the platform (requisites listed below).',
+          'User — an individual or legal entity using the platform or making a payment.',
+          'Service — a subscription to price monitoring, rating analysis and revenue management for hotels.',
+          'Acceptance — the User\'s full acceptance of these offer terms (via payment or registration).',
+        ],
+      },
+      {
+        h: '2. Subject of the offer',
+        p: 'The Provider grants the User access to the platform (subscription) according to the selected pricing plan, and the User pays for it in the established manner.',
+      },
+      {
+        h: '3. Price and payment procedure',
+        p: 'The service price is shown in the pricing plan on the platform (Billing section) and set in Uzbek so‘m. Payments are made online through the ATMOS payment gateway using UzCard, Humo, Visa and Mastercard. The subscription is activated after acceptance (payment). The Provider does not store card details (number, CVV) — they are processed in the secure ATMOS environment.',
+      },
+      {
+        h: '4. Rights and obligations of the parties',
+        list: [
+          'The Provider strives to deliver the service continuously and offer technical support.',
+          'The User must provide accurate data and use the service for lawful purposes.',
+          'The Provider may temporarily suspend the service for maintenance or force majeure.',
+        ],
+      },
+      {
+        h: '5. Refunds',
+        p: 'The User may cancel the subscription at any time; it remains active until the end of the current billing period. If the service was not provided or was charged in error, contact info@thehotelsaas.com for a refund; the request is reviewed within 10 business days and funds are returned to the card used for payment.',
+      },
+      {
+        h: '6. Liability',
+        p: 'The service is provided "as is". The Provider does not guarantee the full accuracy of third-party (OTA) data and is not liable for indirect damages arising from its use. The parties are liable in accordance with the legislation of the Republic of Uzbekistan.',
+      },
+      {
+        h: '7. Dispute resolution',
+        p: 'All disputes are resolved through negotiation. If no agreement is reached, the dispute is settled in court in accordance with the applicable legislation of the Republic of Uzbekistan.',
+      },
+      {
+        h: '8. Term',
+        p: 'The offer is valid from the moment it is published on the platform until a new version is posted. The Provider reserves the right to amend the offer.',
+      },
+      {
+        h: '9. Provider requisites',
+        list: [
+          'Organization name: DENDI PLAZA',
+          'TIN (INN/STIR): 300717633',
+          'Address: Bukhara city, Islom Karimov street',
+          'Email: info@thehotelsaas.com',
+        ],
       },
     ],
   },

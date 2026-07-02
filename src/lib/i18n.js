@@ -185,6 +185,7 @@ const translations = {
     footerContact: 'Bog\'lanish',
     footerTerms: 'Foydalanish shartlari',
     footerPrivacy: 'Maxfiylik siyosati',
+    footerOffer: 'Ommaviy oferta',
     footerRights: 'Barcha huquqlar himoyalangan',
 
     onboarding: 'Tanishuv',
@@ -545,6 +546,7 @@ const translations = {
     footerContact: 'Contact',
     footerTerms: 'Terms',
     footerPrivacy: 'Privacy',
+    footerOffer: 'Public Offer',
     footerRights: 'All rights reserved',
 
     onboarding: 'Onboarding',
@@ -900,6 +902,7 @@ const translations = {
     footerContact: 'Связь',
     footerTerms: 'Условия',
     footerPrivacy: 'Политика',
+    footerOffer: 'Публичная оферта',
     footerRights: 'Все права защищены',
 
     onboarding: 'Знакомство',

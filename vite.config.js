@@ -16,11 +16,11 @@ export default defineConfig({
     host: true,
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: "https://api.thehotelsaas.com",
         changeOrigin: true,
       },
       "/socket.io": {
-        target: "http://localhost:5000",
+        target: "https://api.thehotelsaas.com",
         changeOrigin: true,
         ws: true,
       },

@@ -84,6 +84,11 @@ export function PublicFooter() {
                   {t('footerPrivacy')}
                 </Link>
               </li>
+              <li>
+                <Link to="/offer" className="text-muted-foreground hover:text-foreground transition-colors">
+                  {t('footerOffer')}
+                </Link>
+              </li>
             </ul>
           </div>
         </Reveal>
