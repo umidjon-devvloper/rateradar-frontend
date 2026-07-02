@@ -69,10 +69,10 @@ export function SupportChat() {
           role: 'assistant',
           content:
             lang === 'uz'
-              ? 'Xatolik yuz berdi. Iltimos qayta urinib ko\'ring yoki:\n• Telegram: @rateradar_support\n• Email: support@rateradar.uz'
+              ? 'Xatolik yuz berdi. Iltimos qayta urinib ko\'ring yoki:\n• Telegram: @rateradar_support\n• Email: info@thehotelsaas.com'
               : lang === 'ru'
-              ? 'Произошла ошибка. Попробуйте снова или:\n• Telegram: @rateradar_support\n• Email: support@rateradar.uz'
-              : 'An error occurred. Please try again or:\n• Telegram: @rateradar_support\n• Email: support@rateradar.uz',
+              ? 'Произошла ошибка. Попробуйте снова или:\n• Telegram: @rateradar_support\n• Email: info@thehotelsaas.com'
+              : 'An error occurred. Please try again or:\n• Telegram: @rateradar_support\n• Email: info@thehotelsaas.com',
         },
       ]);
     } finally {

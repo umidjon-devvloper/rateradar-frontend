@@ -7,7 +7,7 @@
  */
 
 export const CONTACT = {
-  email: 'support@rateradar.uz',
+  email: 'info@thehotelsaas.com',
   telegram: '@rateradar_support',
   telegramUrl: 'https://t.me/rateradar_support',
   brand: 'TheHotelSaaS',
@@ -64,7 +64,7 @@ const uz = {
       },
       {
         h: '4. Bekor qilish va qaytarish',
-        p: "Obunani istalgan vaqtda bekor qilishingiz mumkin — bu joriy hisob-kitob davri oxirigacha amal qiladi. Qaytarish masalalari bo'yicha support@rateradar.uz manziliga murojaat qiling.",
+        p: "Obunani istalgan vaqtda bekor qilishingiz mumkin — bu joriy hisob-kitob davri oxirigacha amal qiladi. Qaytarish masalalari bo'yicha info@thehotelsaas.com manziliga murojaat qiling.",
       },
       {
         h: '5. Javobgarlikni cheklash',
@@ -108,7 +108,7 @@ const uz = {
       },
       {
         h: '6. Sizning huquqlaringiz',
-        p: "Siz o'z ma'lumotlaringizga kirish, ularni tuzatish yoki o'chirishni so'rash huquqiga egasiz. Buning uchun support@rateradar.uz manziliga murojaat qiling.",
+        p: "Siz o'z ma'lumotlaringizga kirish, ularni tuzatish yoki o'chirishni so'rash huquqiga egasiz. Buning uchun info@thehotelsaas.com manziliga murojaat qiling.",
       },
     ],
   },
@@ -165,7 +165,7 @@ const ru = {
       },
       {
         h: '4. Отмена и возврат',
-        p: 'Вы можете отменить подписку в любое время — она действует до конца текущего расчётного периода. По вопросам возврата обращайтесь на support@rateradar.uz.',
+        p: 'Вы можете отменить подписку в любое время — она действует до конца текущего расчётного периода. По вопросам возврата обращайтесь на info@thehotelsaas.com.',
       },
       {
         h: '5. Ограничение ответственности',
@@ -209,7 +209,7 @@ const ru = {
       },
       {
         h: '6. Ваши права',
-        p: 'Вы имеете право на доступ, исправление или удаление ваших данных. Для этого обращайтесь на support@rateradar.uz.',
+        p: 'Вы имеете право на доступ, исправление или удаление ваших данных. Для этого обращайтесь на info@thehotelsaas.com.',
       },
     ],
   },
@@ -266,7 +266,7 @@ const en = {
       },
       {
         h: '4. Cancellation and refunds',
-        p: 'You can cancel your subscription at any time — it remains active until the end of the current billing period. For refund matters, contact support@rateradar.uz.',
+        p: 'You can cancel your subscription at any time — it remains active until the end of the current billing period. For refund matters, contact info@thehotelsaas.com.',
       },
       {
         h: '5. Limitation of liability',
@@ -310,7 +310,7 @@ const en = {
       },
       {
         h: '6. Your rights',
-        p: 'You have the right to access, correct or request deletion of your data. To do so, contact support@rateradar.uz.',
+        p: 'You have the right to access, correct or request deletion of your data. To do so, contact info@thehotelsaas.com.',
       },
     ],
   },
