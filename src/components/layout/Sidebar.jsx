@@ -86,7 +86,7 @@ export function Sidebar({ mobileOpen, collapsed, onClose }) {
             { to: '/dashboard', icon: LayoutDashboard, label: t('overview') },
             { to: '/competitors', icon: Users, label: t('competitors') },
             { to: '/prices', icon: TrendingUp, label: t('rateShopper') },
-            { to: '/ota-channels', icon: Globe, label: t('otaChannels') },
+            { to: '/hotel-service', icon: ConciergeBell, label: t('hotelService') },
             { to: '/rating-map', icon: Map, label: t('ratingMap') },
           ],
         },
@@ -96,7 +96,7 @@ export function Sidebar({ mobileOpen, collapsed, onClose }) {
             { to: '/reviews', icon: MessageSquare, label: t('reviews') },
             { to: '/notifications', icon: Bell, label: t('notifications') },
             { to: '/ai', icon: Sparkles, label: t('aiAnalysis') },
-            { to: '/hotel-service', icon: ConciergeBell, label: t('hotelService') },
+            { to: '/ota-channels', icon: Globe, label: t('otaChannels') },
           ],
         },
         {
