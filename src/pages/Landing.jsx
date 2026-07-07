@@ -349,19 +349,27 @@ export default function Landing() {
               </div>
 
               <div className="text-center">
-                <div className="mt-2 flex items-baseline justify-center gap-1.5">
-                  <span className="text-5xl font-bold tracking-tight">
-                    ${isYearly ? proPlan.priceUsd * 10 : proPlan.priceUsd}
-                  </span>
-                  <span className="text-sm text-muted-foreground">/ {isYearly ? t('perYear') : t('perMonth')}</span>
-                </div>
-                <div className="mt-1.5 text-sm text-muted-foreground">
-                  {(isYearly ? proPlan.priceUzs * 10 : proPlan.priceUzs).toLocaleString('uz-UZ')} {t('currencyUzs')} / {isYearly ? t('perYear') : t('perMonth')}
-                </div>
-                {!isYearly && (
-                  <div className="mt-1 text-xs text-green-600 font-medium">
-                    {t('perYear')}: ${proPlan.priceUsd * 10} — 2 oy bepul
+                {isYearly ? (
+                  <div className="mt-4 mb-3 flex items-center justify-center">
+                    <span className="text-4xl font-bold tracking-tight text-primary">
+                      Maxsus narx
+                    </span>
                   </div>
+                ) : (
+                  <>
+                    <div className="mt-2 flex items-baseline justify-center gap-1.5">
+                      <span className="text-5xl font-bold tracking-tight">
+                        ${proPlan.priceUsd}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/ {t('perMonth')}</span>
+                    </div>
+                    <div className="mt-1.5 text-sm text-muted-foreground">
+                      {proPlan.priceUzs.toLocaleString('uz-UZ')} {t('currencyUzs')} / {t('perMonth')}
+                    </div>
+                    <div className="mt-1 text-xs text-green-600 font-medium">
+                      {t('perYear')}: ${proPlan.priceUsd * 10} — 2 oy bepul
+                    </div>
+                  </>
                 )}
                 <div className="mt-2 text-xs text-muted-foreground/70">{proPlan.desc}</div>
               </div>
