@@ -24,7 +24,7 @@ const translations = {
     landingTagline: 'Hotellar uchun zamonaviy narx monitoring',
     landingHeadline: 'Raqobatchilar narxlarini\nbir joyda kuzating',
     landingSub: 'TheHotelSaaS — barcha OTA platformalardagi raqobatchi narxlarni avtomatik yig\'adi, AI yordamida tahlil qiladi va sizga real vaqt rejimida tavsiyalar beradi.',
-    ctaPrimary: 'Bepul boshlash',
+    ctaPrimary: 'Boshlash',
     ctaSecondary: 'Demo ko\'rish',
     trustBadge: 'Booking.com, Expedia, Agoda va 6+ platformalardan ma\'lumot',
     heroT1: 'Raqobatchi narxlari',

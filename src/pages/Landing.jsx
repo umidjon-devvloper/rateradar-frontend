@@ -27,8 +27,14 @@ import { SupportChat } from '@/components/SupportChat';
 import { PaymentModal } from '@/components/PaymentModal';
 import { Reveal, Stagger, StaggerItem } from '@/components/ui/motion';
 import { HeroCarousel } from '@/components/HeroCarousel';
-import { FeatureCard } from '@/components/FeatureCard';
 import { HotelServiceMockup } from '@/components/HotelServiceMockup';
+import { MarqueePartners } from '@/components/MarqueePartners';
+import { IntegrationsAnimated } from '@/components/IntegrationsAnimated';
+import { TestimonialSection } from '@/components/TestimonialSection';
+import { FAQAccordion } from '@/components/FAQAccordion';
+import { FomoNotifications } from '@/components/FomoNotifications';
+import { BentoFeatures } from '@/components/BentoFeatures';
+import { DashboardPreview } from '@/components/DashboardPreview';
 import CountUp from '@/components/ui/CountUp';
 import { useT } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
@@ -48,15 +54,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const isAuthenticated = useAuth((s) => s.isAuthenticated());
   const [payPlan, setPayPlan] = useState(null); // { id, name, priceUzs }
-
-  const features = [
-    { icon: TrendingUp, title: t('feature1Title'), desc: t('feature1Desc') },
-    { icon: Sparkles, title: t('feature2Title'), desc: t('feature2Desc') },
-    { icon: MessageSquare, title: t('feature3Title'), desc: t('feature3Desc') },
-    { icon: MapPin, title: t('feature4Title'), desc: t('feature4Desc') },
-    { icon: Bell, title: t('feature5Title'), desc: t('feature5Desc') },
-    { icon: Layers, title: t('feature6Title'), desc: t('feature6Desc') },
-  ];
+  const [isYearly, setIsYearly] = useState(false);
 
   const steps = [
     { num: '01', title: t('step1Title'), desc: t('step1Desc') },
@@ -92,16 +90,6 @@ export default function Landing() {
     { icon: Utensils, label: t('hsSvcFood') },
     { icon: Car, label: t('hsSvcTaxi') },
     { icon: Layers, label: t('hsSvcTowel') },
-  ];
-
-  // Har bir imkoniyat ikonkasi uchun jonli gradient rang (premium ko'rinish)
-  const featureColors = [
-    'from-blue-500 to-indigo-600',
-    'from-violet-500 to-purple-600',
-    'from-emerald-500 to-teal-600',
-    'from-amber-500 to-orange-600',
-    'from-rose-500 to-pink-600',
-    'from-cyan-500 to-sky-600',
   ];
 
   // Hero ostidagi statistika bandi (iRoom uslubida — yirik raqamlar, count-up animatsiya)
@@ -184,6 +172,9 @@ export default function Landing() {
             <HeroCarousel />
           </div>
         </div>
+
+        {/* Marquee Partners */}
+        <MarqueePartners />
       </section>
 
       {/* STATS BAND — iRoom uslubida yirik raqamlar */}
@@ -202,28 +193,11 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" className="py-20 sm:py-28 border-t relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/[0.06] rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-violet-500/[0.05] rounded-full blur-3xl -z-10" />
-        <div className="max-w-[1400px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <Reveal className="max-w-2xl mx-auto text-center mb-14">
-            <Eyebrow>{t('navFeatures')}</Eyebrow>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-              {t('featuresTitle')}
-            </h2>
-            <p className="mt-4 text-muted-foreground">{t('featuresSub')}</p>
-          </Reveal>
+      {/* DASHBOARD PREVIEW */}
+      <DashboardPreview />
 
-          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <StaggerItem key={i} style={{ perspective: "1000px" }}>
-                <FeatureCard feature={f} index={i} featureColors={featureColors} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </div>
-      </section>
+      {/* BENTO FEATURES */}
+      <BentoFeatures />
 
       {/* HOW IT WORKS */}
       <section id="how" className="py-20 sm:py-28 border-t bg-muted/20">
@@ -321,16 +295,46 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* INTEGRATIONS & TESTIMONIALS */}
+      <IntegrationsAnimated />
+      <TestimonialSection />
+
       {/* PRICING */}
       <section id="pricing" className="py-20 sm:py-28 border-t bg-muted/20 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/[0.05] rounded-full blur-3xl -z-0" />
         <div className="max-w-[1400px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <Reveal className="max-w-2xl mx-auto text-center mb-14">
+          <Reveal className="max-w-2xl mx-auto text-center mb-10">
             <Eyebrow>{t('navPricing')}</Eyebrow>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
               {t('pricingTitle')}
             </h2>
             <p className="mt-4 text-muted-foreground">{t('pricingSub')}</p>
+          </Reveal>
+
+          {/* TOGGLE */}
+          <Reveal className="flex justify-center mb-14" delay={0.1}>
+            <div className="relative flex items-center p-1 bg-muted/50 rounded-full border border-border/50">
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`relative w-32 py-2.5 text-sm font-semibold rounded-full z-10 transition-colors ${!isYearly ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Oylik
+              </button>
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`relative w-32 py-2.5 text-sm font-semibold rounded-full z-10 transition-colors ${isYearly ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Yillik
+                {/* Yaltirab turuvchi nishoncha */}
+                <span className="absolute -top-3 -right-3 px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-full animate-bounce shadow-lg shadow-green-500/20">
+                  2 oy bepul
+                </span>
+              </button>
+              <div
+                className="absolute w-32 h-[calc(100%-8px)] bg-primary rounded-full transition-transform duration-300 ease-in-out shadow-md"
+                style={{ transform: `translateX(${isYearly ? '100%' : '0'})` }}
+              />
+            </div>
           </Reveal>
 
           <Stagger className="max-w-md mx-auto">
@@ -347,17 +351,19 @@ export default function Landing() {
               <div className="text-center">
                 <div className="mt-2 flex items-baseline justify-center gap-1.5">
                   <span className="text-5xl font-bold tracking-tight">
-                    ${proPlan.priceUsd}
+                    ${isYearly ? proPlan.priceUsd * 10 : proPlan.priceUsd}
                   </span>
-                  <span className="text-sm text-muted-foreground">/ {t('perMonth')}</span>
+                  <span className="text-sm text-muted-foreground">/ {isYearly ? t('perYear') : t('perMonth')}</span>
                 </div>
                 <div className="mt-1.5 text-sm text-muted-foreground">
-                  {proPlan.priceUzs.toLocaleString('uz-UZ')} {t('currencyUzs')} / {t('perMonth')}
+                  {(isYearly ? proPlan.priceUzs * 10 : proPlan.priceUzs).toLocaleString('uz-UZ')} {t('currencyUzs')} / {isYearly ? t('perYear') : t('perMonth')}
                 </div>
-                <div className="mt-1 text-xs text-green-600 font-medium">
-                  {t('perYear')}: $490 — {t('yearlySaveBadge')}
-                </div>
-                <div className="mt-1 text-xs text-muted-foreground/70">{proPlan.desc}</div>
+                {!isYearly && (
+                  <div className="mt-1 text-xs text-green-600 font-medium">
+                    {t('perYear')}: ${proPlan.priceUsd * 10} — 2 oy bepul
+                  </div>
+                )}
+                <div className="mt-2 text-xs text-muted-foreground/70">{proPlan.desc}</div>
               </div>
 
               <ul className="mt-7 space-y-2.5 flex-1">
@@ -399,6 +405,9 @@ export default function Landing() {
         <PaymentModal plan={payPlan} onClose={() => setPayPlan(null)} />
       )}
 
+      {/* FAQ */}
+      <FAQAccordion />
+
       {/* FINAL CTA */}
       <section className="py-20 sm:py-28 border-t relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -z-10" />
@@ -421,6 +430,9 @@ export default function Landing() {
       {/* FOOTER */}
       <PublicFooter />
       <SupportChat />
+      
+      {/* FOMO NOTIFICATIONS */}
+      <FomoNotifications />
     </div>
   );
 }

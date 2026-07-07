@@ -105,29 +105,35 @@ export function SupportChat() {
       {/* Chat panel */}
       <div
         className={cn(
-          'fixed bottom-6 right-6 z-50 w-80 sm:w-96 rounded-2xl shadow-2xl border bg-card flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right',
+          'fixed bottom-24 right-6 z-50 w-[380px] sm:w-[480px] rounded-[2rem] shadow-2xl shadow-primary/20 border border-primary/10 bg-card flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right',
           open
             ? 'opacity-100 scale-100 pointer-events-auto'
             : 'opacity-0 scale-90 pointer-events-none'
         )}
-        style={{ maxHeight: 'min(520px, calc(100vh - 100px))' }}
+        style={{ maxHeight: 'min(700px, calc(100vh - 100px))', height: '600px' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Bot className="h-4 w-4" />
+        <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-primary to-violet-600 text-white shrink-0 relative overflow-hidden">
+          {/* Subtle background glow/pattern */}
+          <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent opacity-50" />
+          
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-inner">
+              <Bot className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="text-sm font-semibold leading-none">{TITLE[lang] || TITLE.uz}</div>
-              <div className="text-[10px] mt-0.5 opacity-80">{SUBTITLE[lang] || SUBTITLE.uz}</div>
+              <div className="text-base font-bold leading-tight">{TITLE[lang] || TITLE.uz}</div>
+              <div className="text-xs mt-0.5 opacity-90 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                {SUBTITLE[lang] || SUBTITLE.uz}
+              </div>
             </div>
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="p-1 rounded-md hover:bg-white/20 transition-colors"
+            className="p-1.5 rounded-full hover:bg-white/20 transition-colors relative z-10"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -154,7 +160,7 @@ export function SupportChat() {
               </div>
               <div
                 className={cn(
-                  'max-w-[78%] rounded-2xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap',
+                  'max-w-[85%] rounded-3xl px-4 py-3 text-base leading-relaxed whitespace-pre-wrap',
                   msg.role === 'user'
                     ? 'bg-primary text-primary-foreground rounded-tr-sm'
                     : 'bg-muted text-foreground rounded-tl-sm'
