@@ -60,8 +60,8 @@ export function BentoFeatures() {
                 Gemini sizning bozor pozitsiyangizni o'rganadi va kunlik narx strategiyasini yozib beradi. O'ylashga vaqt ketkazmaysiz.
               </p>
               <div className="mt-auto bg-muted/50 rounded-xl p-4 text-xs font-mono text-muted-foreground border group-hover:border-violet-500/30 transition-colors">
-                > Analizing competitors...<br/>
-                > Optimal price for tomorrow: <span className="text-green-500 font-bold">$120</span>
+                &gt; Analizing competitors...<br/>
+                &gt; Optimal price for tomorrow: <span className="text-green-500 font-bold">$120</span>
               </div>
             </SpotlightCard>
           </Reveal>

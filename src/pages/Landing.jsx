@@ -378,12 +378,18 @@ export default function Landing() {
               </ul>
 
               <Button
-                className="mt-7 w-full rounded-full"
+                className="mt-7 w-full rounded-full flex items-center justify-center gap-2"
                 size="lg"
-                onClick={handlePlanCta}
+                onClick={() => {
+                  if (isYearly) {
+                    window.open('https://t.me/rateradar_support', '_blank');
+                  } else {
+                    handlePlanCta();
+                  }
+                }}
               >
-                {isAuthenticated ? t('subscribe') : t('signUp')}
-                <ArrowRight className="h-4 w-4" />
+                {isYearly ? "Yordam markaziga bog'lanish" : (isAuthenticated ? t('subscribe') : t('signUp'))}
+                {isYearly ? <MessageSquare className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
               </Button>
 
               {/* To'lov usullari: Humo faol · Visa tez orada */}
