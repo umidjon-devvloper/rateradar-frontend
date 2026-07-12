@@ -314,13 +314,14 @@ export default function ServicePage() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-5">
-              {/* Mahsulotlar (menyu) — rasm va narx bilan, bir nechtasini tanlash mumkin */}
+              {/* Mahsulotlar (menyu) — vertikal kartalar, katta rasm (mobil uchun 2 ustun).
+                  Bir nechtasini tanlash mumkin; tanlangani rangli ramka + belgi bilan. */}
               {selected.items?.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider mb-2.5" style={lbl}>
                     {t("selectSubOption")}
                   </p>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {selected.items.map(it => {
                       const name = it.translated_name || it.name;
                       const on = pickedItems.includes(name);
@@ -328,32 +329,40 @@ export default function ServicePage() {
                         <button key={it._id}
                           onClick={() => toggleItem(name)}
                           style={{
-                            backgroundColor: on ? `${primary}12` : pageBg,
                             borderColor: on ? primary : cardBorder,
+                            backgroundColor: cardBg,
+                            boxShadow: on ? `0 4px 16px ${primary}30` : "0 1px 4px rgba(0,0,0,0.06)",
                           }}
-                          className="w-full flex items-center gap-3 p-2.5 rounded-2xl border-2 text-left transition-all active:scale-[0.99]">
-                          {it.image_url ? (
-                            <img src={assetUrl(it.image_url)} alt={name}
-                              className="w-14 h-14 rounded-xl object-cover flex-shrink-0" loading="lazy" />
-                          ) : (
-                            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                              style={{ backgroundColor: `${primary}12` }}>
-                              {selected.icon || "🍽"}
+                          className="relative flex flex-col rounded-2xl border-2 overflow-hidden text-left transition-all active:scale-[0.97]">
+                          {/* Rasm — kartaning tepa qismi, kengligi to'liq */}
+                          <div className="relative w-full aspect-[4/3] overflow-hidden">
+                            {it.image_url ? (
+                              <img src={assetUrl(it.image_url)} alt={name}
+                                className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-4xl"
+                                style={{ background: `linear-gradient(135deg, ${primary}18, ${primary}08)` }}>
+                                {selected.icon || "🍽"}
+                              </div>
+                            )}
+                            {/* Tanlov belgisi — rasm burchagida */}
+                            <div className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all"
+                              style={on
+                                ? { backgroundColor: primary }
+                                : { backgroundColor: "rgba(255,255,255,0.85)", border: `1.5px solid ${cardBorder}` }}>
+                              {on && <Check size={14} className="text-white" strokeWidth={3} />}
                             </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold leading-tight" style={{ color: fg }}>{name}</p>
+                          </div>
+                          {/* Nom + narx */}
+                          <div className="px-2.5 pt-2 pb-2.5">
+                            <p className="text-[13px] font-semibold leading-snug line-clamp-2" style={{ color: fg }}>
+                              {name}
+                            </p>
                             {Number(it.price) > 0 && (
-                              <p className="text-xs mt-0.5 font-medium" style={{ color: on ? primary : subc }}>
+                              <p className="text-sm font-bold mt-1" style={{ color: primary }}>
                                 {Number(it.price).toLocaleString()}
                               </p>
                             )}
-                          </div>
-                          <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors"
-                            style={on
-                              ? { backgroundColor: primary, borderColor: primary }
-                              : { borderColor: cardBorder }}>
-                            {on && <Check size={13} className="text-white" />}
                           </div>
                         </button>
                       );

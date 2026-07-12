@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useOutletContext }    from "react-router-dom";
 import { Pencil, Trash2, Check, X, Send } from "lucide-react";
 import { useToast }        from "../../context/ToastContext";
-import SearchableSelect    from "../../components/ui/SearchableSelect";
 import api                 from "../../lib/api";
 
 export default function StaffPage() {
@@ -29,11 +28,12 @@ export default function StaffPage() {
 
   useEffect(() => { load(); }, []);
 
-  // Services ni SearchableSelect uchun options formatiga o'tkazish
-  const serviceOptions = services.map(s => ({
-    value: s._id,
-    label: s.name,
-    sublabel: s.icon,
+  // Tahrirlashda xizmat chipini yoqish/o'chirish (ko'p tanlov)
+  const toggleSvc = (id) => setEditing(p => ({
+    ...p,
+    svcIds: p.svcIds.includes(id)
+      ? p.svcIds.filter(x => x !== id)
+      : [...p.svcIds, id],
   }));
 
   const saveEdit = async (s) => {
@@ -108,19 +108,29 @@ export default function StaffPage() {
                       {/* Xizmatlar */}
                       <td className="table-cell min-w-[220px]">
                         {isEditing ? (
-                          <SearchableSelect
-                            value={editing.svcIds[0] || ""}
-                            onChange={(v) => setEditing(p => ({
-                              ...p,
-                              svcIds: p.svcIds.includes(v)
-                                ? p.svcIds.filter(x => x !== v)
-                                : [...p.svcIds, v],
-                            }))}
-                            options={serviceOptions}
-                            placeholder={t("selectServices")}
-                            searchPlaceholder={t("searchServices")}
-                            className="w-52"
-                          />
+                          /* Chip-tanlagich: barcha xizmatlar ko'rinadi, bosib
+                             yoqiladi/o'chiriladi — dropdown yo'q, kesilmaydi. */
+                          <div className="flex flex-wrap gap-1.5 py-0.5">
+                            {services.map(sv => {
+                              const on = editing.svcIds.includes(sv._id);
+                              return (
+                                <button key={sv._id}
+                                  onClick={() => toggleSvc(sv._id)}
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all active:scale-95 ${
+                                    on
+                                      ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                                      : "bg-white border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
+                                  }`}>
+                                  <span>{sv.icon}</span>
+                                  {sv.name}
+                                  {on && <Check size={12} strokeWidth={3} />}
+                                </button>
+                              );
+                            })}
+                            {services.length === 0 && (
+                              <span className="text-gray-400 text-xs">{t("noServices")}</span>
+                            )}
+                          </div>
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {!s.service_ids?.length ? (
