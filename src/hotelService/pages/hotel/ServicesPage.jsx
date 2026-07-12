@@ -160,9 +160,19 @@ export default function ServicesPage() {
                           {o.name}
                         </span>
                       ))}
-                      {s.items?.length > 0 && (
-                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-medium">
-                          🍽 {s.items.length} ta mahsulot
+                      {/* Ichma-ich mahsulotlar (menyu) — nomi, rasmi va narxi bilan */}
+                      {(s.items || []).slice(0, 5).map(it => (
+                        <span key={it._id} className="inline-flex items-center gap-1 pl-0.5 pr-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-xs">
+                          {it.image_url
+                            ? <img src={assetUrl(it.image_url)} alt="" className="w-4 h-4 rounded-full object-cover" />
+                            : <span className="text-[10px]">🍽</span>}
+                          {it.name}
+                          {Number(it.price) > 0 && <span className="opacity-60">· {Number(it.price).toLocaleString()}</span>}
+                        </span>
+                      ))}
+                      {(s.items || []).length > 5 && (
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                          +{s.items.length - 5}
                         </span>
                       )}
                       {!s.sub_options?.length && !s.items?.length && (
