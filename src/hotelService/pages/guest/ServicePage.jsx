@@ -5,7 +5,7 @@ import { useGuestLang }       from "../../context/GuestLangContext";
 import { ALL_LANGUAGES, getLangDir } from "../../lib/i18n";
 import { addToHistory }       from "../../lib/history";
 import { DecorHeader, DecorBg } from "../../lib/templates";
-import api                    from "../../lib/api";
+import api, { assetUrl }      from "../../lib/api";
 
 // Inline til dropdown (guest uchun)
 function LangDropdown({ lang, onChangeLang, translating }) {
@@ -87,6 +87,7 @@ export default function ServicePage() {
   const [selected,    setSelected]    = useState(null);
   const [showService, setShowService] = useState(false);
   const [subOption,   setSubOption]   = useState("");
+  const [pickedItems, setPickedItems] = useState([]); // tanlangan mahsulotlar (nomlari)
   const [description, setDescription] = useState("");
   const [descErr,     setDescErr]     = useState("");
 
@@ -143,19 +144,29 @@ export default function ServicePage() {
     }
     setSelected(svc);
     setSubOption("");
+    setPickedItems([]);
     setDescription("");
     setDescErr("");
     setShowService(true);
+  };
+
+  const toggleItem = (name) => {
+    setPickedItems((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
   };
 
   const handleSubmit = () => {
     if (!room.trim()) { setRoomErr(t("roomRequired")); return; }
     if (!selected) return;
     localStorage.setItem("guest_room", room.trim());
+    // Tanlangan mahsulotlar sub_option sifatida yuboriladi ("Lag'mon, Cola").
+    // Sub-option ham tanlangan bo'lsa, ikkalasi birlashtiriladi.
+    const parts = [subOption, ...pickedItems].filter(Boolean);
     navigate("/hotel-service/g/confirm", { state: {
       hotelId, room_number: room.trim(), lang,
       service: selected,
-      sub_option: subOption || null,
+      sub_option: parts.length ? parts.join(", ") : null,
       description: description.trim() || null,
     }});
   };
@@ -303,6 +314,54 @@ export default function ServicePage() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-5">
+              {/* Mahsulotlar (menyu) — rasm va narx bilan, bir nechtasini tanlash mumkin */}
+              {selected.items?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-2.5" style={lbl}>
+                    {t("selectSubOption")}
+                  </p>
+                  <div className="space-y-2">
+                    {selected.items.map(it => {
+                      const name = it.translated_name || it.name;
+                      const on = pickedItems.includes(name);
+                      return (
+                        <button key={it._id}
+                          onClick={() => toggleItem(name)}
+                          style={{
+                            backgroundColor: on ? `${primary}12` : pageBg,
+                            borderColor: on ? primary : cardBorder,
+                          }}
+                          className="w-full flex items-center gap-3 p-2.5 rounded-2xl border-2 text-left transition-all active:scale-[0.99]">
+                          {it.image_url ? (
+                            <img src={assetUrl(it.image_url)} alt={name}
+                              className="w-14 h-14 rounded-xl object-cover flex-shrink-0" loading="lazy" />
+                          ) : (
+                            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                              style={{ backgroundColor: `${primary}12` }}>
+                              {selected.icon || "🍽"}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold leading-tight" style={{ color: fg }}>{name}</p>
+                            {Number(it.price) > 0 && (
+                              <p className="text-xs mt-0.5 font-medium" style={{ color: on ? primary : subc }}>
+                                {Number(it.price).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+                            style={on
+                              ? { backgroundColor: primary, borderColor: primary }
+                              : { borderColor: cardBorder }}>
+                            {on && <Check size={13} className="text-white" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {selected.sub_options?.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider mb-2.5" style={lbl}>

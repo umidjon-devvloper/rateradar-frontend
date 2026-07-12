@@ -171,6 +171,9 @@ export const aiApi = {
     api.post("/ai/analyze-review", { text, lang }).then((r) => r.data),
   chat: (messages) =>
     axios.post(`${API_URL}/ai/chat`, { messages }).then((r) => r.data.reply),
+  // AI-tahlil sahifasidagi shaxsiy yordamchi (hotel konteksti bilan, auth talab)
+  assistantChat: (messages) =>
+    api.post("/ai/assistant-chat", { messages }, { timeout: 60 * 1000 }).then((r) => r.data.reply),
 };
 
 export const notificationApi = {

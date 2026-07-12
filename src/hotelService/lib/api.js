@@ -23,4 +23,13 @@ api.interceptors.response.use(
   }
 );
 
+// Yuklangan rasm (/uploads/...) uchun to'liq URL — API backend'i domenidan.
+// Tashqi (http...) URL bo'lsa o'zgarishsiz qaytadi.
+export const assetUrl = (p) => {
+  if (!p) return "";
+  if (/^https?:\/\//i.test(p)) return p;
+  const origin = API_URL.replace(/\/api\/?$/, "");
+  return `${origin}${p.startsWith("/") ? "" : "/"}${p}`;
+};
+
 export default api;

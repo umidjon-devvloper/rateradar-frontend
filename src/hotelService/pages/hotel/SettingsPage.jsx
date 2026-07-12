@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Copy, Users, RefreshCw } from "lucide-react";
 import { useHotel }      from "../../context/HotelContext";
 import { useToast }      from "../../context/ToastContext";
 import { ALL_LANGUAGES } from "../../lib/i18n";
@@ -20,6 +20,19 @@ export default function SettingsPage() {
 
   const [lang,   setLang]   = useState(hotel?.language || "ru");
   const [saving, setSaving] = useState(false);
+
+  // Telegram guruh holati — /hotel/me dan yangi ma'lumot (group_chat_id, invite_code)
+  const [me, setMe] = useState(null);
+  const loadMe = async () => {
+    try { const { data } = await api.get("/hotel/me"); setMe(data); } catch { /* jim */ }
+  };
+  useEffect(() => { loadMe(); }, []);
+
+  const linkCmd = me?.invite_code ? `/ulash ${me.invite_code}` : "";
+  const copyCmd = () => {
+    navigator.clipboard.writeText(linkCmd);
+    toast(t("copied") || "Nusxalandi", "success");
+  };
 
   const saveLang = async () => {
     try {
@@ -56,6 +69,50 @@ export default function SettingsPage() {
             : <Check size={15} />}
           {t("save")}
         </button>
+      </div>
+
+      {/* Telegram GURUH integratsiyasi */}
+      <div className="card p-5">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <Users size={16} className="text-blue-600" /> Telegram guruh
+          </h2>
+          <button onClick={loadMe} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg transition-colors" title="Yangilash">
+            <RefreshCw size={14} />
+          </button>
+        </div>
+        <p className="text-sm text-gray-400 mb-4">
+          Botni guruhga qo'shsangiz, mehmonlarning barcha buyurtmalari xodimlarga
+          shaxsiy xabardan tashqari shu guruhga ham tushadi.
+        </p>
+
+        {me?.group_chat_id ? (
+          <div className="flex items-center gap-2.5 bg-emerald-50 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+            <Check size={16} className="flex-shrink-0" />
+            <span>Ulangan: <b>{me.group_title || "guruh"}</b>. Uzish uchun guruhda <code className="font-mono bg-white/60 px-1 rounded">/uzish</code> yozing.</span>
+          </div>
+        ) : (
+          <ol className="space-y-2.5 text-sm text-gray-600 list-decimal list-inside">
+            <li>
+              Botni guruhga qo'shing:{" "}
+              {me?.bot_username
+                ? <a href={`https://t.me/${me.bot_username}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">@{me.bot_username}</a>
+                : <span className="font-medium">xizmat botini</span>}
+            </li>
+            <li>
+              Guruhda shu buyruqni yuboring:
+              <span className="inline-flex items-center gap-1.5 ml-1.5 bg-gray-100 rounded-lg px-2 py-1">
+                <code className="font-mono text-xs text-gray-800">{linkCmd || "/ulash inv_..."}</code>
+                {linkCmd && (
+                  <button onClick={copyCmd} className="text-gray-400 hover:text-blue-600 transition-colors">
+                    <Copy size={12} />
+                  </button>
+                )}
+              </span>
+            </li>
+            <li>Bot tasdiqlagach, buyurtmalar guruhga tushadi. Guruhdan istalgan kishi «Qabul qilish»ni bosishi mumkin.</li>
+          </ol>
+        )}
       </div>
 
       {/* Hotel ma'lumotlari */}

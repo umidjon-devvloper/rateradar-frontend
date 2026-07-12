@@ -1,10 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useOutletContext }    from "react-router-dom";
-import { Plus, Pencil, Trash2, X, Check, Copy, RefreshCw, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, Copy, RefreshCw, ExternalLink, ImagePlus, Loader2 } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
-import api          from "../../lib/api";
+import api, { assetUrl } from "../../lib/api";
 
-const EMPTY = { name: "", sub_options: [] };
+const EMPTY = { name: "", sub_options: [], items: [] };
+
+// Faylni base64 dataURL'ga o'qish (rasm yuklash uchun)
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
 
 export default function ServicesPage() {
   const { t }                  = useOutletContext();
@@ -15,6 +24,10 @@ export default function ServicesPage() {
   const [saving,   setSaving]   = useState(false);
   const [newSub,   setNewSub]   = useState("");
   const [copied,   setCopied]   = useState(null);
+  // Yangi item (menyu mahsuloti) formasi
+  const [newItem,  setNewItem]  = useState({ name: "", price: "", image_url: "" });
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
 
   const load = async () => {
     try { setLoading(true); const { data } = await api.get("/hotel/services"); setServices(data); }
@@ -24,15 +37,39 @@ export default function ServicesPage() {
 
   useEffect(() => { load(); }, []);
 
-  const openAdd  = () => setModal({ mode: "add",  data: { ...EMPTY, sub_options: [] } });
-  const openEdit = (s) => setModal({ mode: "edit", data: { ...s, sub_options: s.sub_options || [] } });
-  const close    = () => { setModal(null); setNewSub(""); };
+  const openAdd  = () => setModal({ mode: "add",  data: { ...EMPTY, sub_options: [], items: [] } });
+  const openEdit = (s) => setModal({ mode: "edit", data: { ...s, sub_options: s.sub_options || [], items: s.items || [] } });
+  const close    = () => { setModal(null); setNewSub(""); setNewItem({ name: "", price: "", image_url: "" }); };
   const set      = (k, v) => setModal(p => ({ ...p, data: { ...p.data, [k]: v } }));
 
   const addSub = () => {
     if (!newSub.trim()) return;
     set("sub_options", [...modal.data.sub_options, { name: newSub.trim(), _id: Date.now().toString() }]);
     setNewSub("");
+  };
+
+  // Rasm yuklash: fayl → base64 → backend → URL
+  const uploadItemImage = async (file) => {
+    if (!file) return;
+    if (file.size > 1.4 * 1024 * 1024) { toast("Rasm 1.4MB dan kichik bo'lsin", "warning"); return; }
+    try {
+      setUploading(true);
+      const dataUrl = await fileToDataUrl(file);
+      const { data } = await api.post("/hotel/upload-image", { image: dataUrl });
+      setNewItem(p => ({ ...p, image_url: data.url }));
+    } catch { toast(t("error"), "error"); }
+    finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
+  };
+
+  const addItem = () => {
+    if (!newItem.name.trim()) return;
+    set("items", [...(modal.data.items || []), {
+      name: newItem.name.trim(),
+      price: Number(newItem.price) || 0,
+      image_url: newItem.image_url || "",
+      _id: Date.now().toString(),
+    }]);
+    setNewItem({ name: "", price: "", image_url: "" });
   };
 
   const save = async () => {
@@ -117,15 +154,21 @@ export default function ServicesPage() {
                     <p className="font-medium text-gray-900">{s.name}</p>
                   </td>
                   <td className="table-cell">
-                    {s.sub_options?.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {s.sub_options.map(o => (
-                          <span key={o._id} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                            {o.name}
-                          </span>
-                        ))}
-                      </div>
-                    ) : <span className="text-gray-400 text-xs">—</span>}
+                    <div className="flex flex-wrap gap-1 items-center">
+                      {s.sub_options?.map(o => (
+                        <span key={o._id} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                          {o.name}
+                        </span>
+                      ))}
+                      {s.items?.length > 0 && (
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-medium">
+                          🍽 {s.items.length} ta mahsulot
+                        </span>
+                      )}
+                      {!s.sub_options?.length && !s.items?.length && (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </div>
                   </td>
                   <td className="table-cell">
                     {s.invite_link ? (
@@ -217,6 +260,72 @@ export default function ServicesPage() {
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors">
                     <Plus size={15} />
                   </button>
+                </div>
+              </div>
+
+              {/* Mahsulotlar (menyu) — masalan Ovqat xizmati ichidagi taomlar.
+                  Mehmon xizmatni bosganda shu ro'yxat rasm va narx bilan chiqadi. */}
+              <div>
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 block">
+                  Mahsulotlar (menyu)
+                </label>
+                <p className="text-[11px] text-gray-400 mb-2">
+                  Masalan: Ovqat xizmati ichiga taomlar, Ichimliklar ichiga ichimliklar. Mehmonga rasm va narx bilan ko'rinadi.
+                </p>
+
+                {(modal.data.items || []).length > 0 && (
+                  <div className="space-y-1.5 mb-3">
+                    {modal.data.items.map(it => (
+                      <div key={it._id} className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-2.5 py-2">
+                        {it.image_url ? (
+                          <img src={assetUrl(it.image_url)} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-gray-400 flex-shrink-0 text-lg">🍽</div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-800 truncate">{it.name}</p>
+                          {Number(it.price) > 0 && (
+                            <p className="text-xs text-gray-400">{Number(it.price).toLocaleString()}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => set("items", modal.data.items.filter(x => x._id !== it._id))}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="space-y-2 border border-dashed border-gray-200 rounded-xl p-3">
+                  <div className="flex gap-2">
+                    <input type="text" value={newItem.name}
+                      onChange={e => setNewItem(p => ({ ...p, name: e.target.value }))}
+                      onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addItem())}
+                      className="input flex-1 py-2 text-sm"
+                      placeholder="Mahsulot nomi (masalan: Lag'mon)" />
+                    <input type="number" value={newItem.price}
+                      onChange={e => setNewItem(p => ({ ...p, price: e.target.value }))}
+                      className="input w-24 py-2 text-sm"
+                      placeholder="Narx" min="0" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                      onChange={e => uploadItemImage(e.target.files?.[0])} />
+                    <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium transition-colors disabled:opacity-60">
+                      {uploading ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+                      {newItem.image_url ? "Rasm almashtirish" : "Rasm yuklash"}
+                    </button>
+                    {newItem.image_url && (
+                      <img src={assetUrl(newItem.image_url)} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                    )}
+                    <button onClick={addItem} disabled={!newItem.name.trim()}
+                      className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-40">
+                      <Plus size={13} /> Qo'shish
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
