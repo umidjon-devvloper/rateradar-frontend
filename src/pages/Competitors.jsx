@@ -826,6 +826,46 @@ export default function Competitors() {
       .catch(() => {});
   }, [hotel?._id]);
 
+  // ── Yaqin-atrof takliflari: forma ochilganda 300 m radiusdagi
+  //    mehmonxonalar avtomatik ko'rsatiladi (bir bosishda qo'shiladi). ──
+  const [nearby, setNearby] = useState([]);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [nearbyAdding, setNearbyAdding] = useState(null); // qo'shilayotgan nom
+
+  useEffect(() => {
+    if (!showAdd) return;
+    const [lng, lat] = hotel?.location?.coordinates || [];
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    setNearbyLoading(true);
+    hotelApi
+      .discoverNearby(lat, lng, 0.3)
+      .then((d) => setNearby((d?.hotels || []).filter((h) => !h.isOwn)))
+      .catch(() => setNearby([]))
+      .finally(() => setNearbyLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAdd, hotel?._id]);
+
+  const quickAddNearby = async (h) => {
+    setNearbyAdding(h.name);
+    try {
+      await hotelApi.addCompetitor({
+        name: h.name,
+        address: h.address,
+        googlePlaceId: h.placeId || '',
+        osmId: h.osmId || '',
+        lat: h.lat,
+        lng: h.lng,
+      });
+      setNearby((prev) => prev.map((x) => (x.name === h.name ? { ...x, isAdded: true } : x)));
+      clearCachePrefix('ai:');
+      load();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Xato');
+    } finally {
+      setNearbyAdding(null);
+    }
+  };
+
   const handleAdd = async () => {
     if (!picked) return;
     setAdding(true);
@@ -1063,6 +1103,50 @@ export default function Competitors() {
                   <div className="text-[11px] text-muted-foreground truncate">{picked.address}</div>
                 </div>
                 <ChevronRight className="h-4 w-4 text-primary shrink-0" />
+              </div>
+            )}
+
+            {/* 300 m radiusdagi mehmonxonalar — bir bosishda qo'shish */}
+            {(nearbyLoading || nearby.length > 0) && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Yaqin atrofdagi mehmonxonalar (300 m)
+                  {nearbyLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                </div>
+                {nearby.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {nearby.map((h) => (
+                      <div key={h.placeId || h.osmId || h.name}
+                        className="rounded-xl border border-border/60 bg-card/60 p-2.5 flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                          {h.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium truncate">{h.name}</div>
+                          <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                            {h.rating > 0 && <span>⭐ {h.rating}</span>}
+                            {Number.isFinite(h.distanceKm) && <span>{Math.round(h.distanceKm * 1000)} m</span>}
+                          </div>
+                        </div>
+                        {h.isAdded ? (
+                          <span className="text-[10px] text-emerald-600 font-medium shrink-0">✓ Qo'shilgan</span>
+                        ) : (
+                          <Button size="sm" variant="outline" className="h-7 px-2 shrink-0"
+                            disabled={nearbyAdding === h.name}
+                            onClick={() => quickAddNearby(h)}>
+                            {nearbyAdding === h.name
+                              ? <Loader2 className="h-3 w-3 animate-spin" />
+                              : <Plus className="h-3 w-3" />}
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!nearbyLoading && nearby.length === 0 && (
+                  <p className="text-xs text-muted-foreground">300 m radiusda mehmonxona topilmadi.</p>
+                )}
               </div>
             )}
             <div className="flex justify-end gap-2 pt-1">
