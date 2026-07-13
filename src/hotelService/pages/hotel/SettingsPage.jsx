@@ -115,6 +115,44 @@ export default function SettingsPage() {
         )}
       </div>
 
+      {/* ADMIN shaxsiy bot ulanishi */}
+      <div className="card p-5">
+        <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-1">
+          👑 Admin nazorati (shaxsiy bot)
+        </h2>
+        <p className="text-sm text-gray-400 mb-4">
+          O'zingizni botga ulasangiz: barcha buyurtmalar, «5 daqiqada hech kim olmadi»
+          va «2.5 soatda bajarilmadi (kim olgani bilan)» ogohlantirishlari shaxsiy chatga keladi.
+        </p>
+
+        {me?.admin_telegram_id ? (
+          <div className="flex items-center gap-2.5 bg-emerald-50 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+            <Check size={16} className="flex-shrink-0" />
+            <span>Ulangan: <b>{me.admin_name || "admin"}</b>. Uzish uchun botga <code className="font-mono bg-white/60 px-1 rounded">/uzish</code> yozing.</span>
+          </div>
+        ) : (
+          <ol className="space-y-2.5 text-sm text-gray-600 list-decimal list-inside">
+            <li>
+              Botni oching:{" "}
+              {me?.bot_username
+                ? <a href={`https://t.me/${me.bot_username}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium hover:underline">@{me.bot_username}</a>
+                : <span className="font-medium">xizmat boti</span>}
+            </li>
+            <li>
+              Shaxsiy chatda shu buyruqni yuboring:
+              <span className="inline-flex items-center gap-1.5 ml-1.5 bg-gray-100 rounded-lg px-2 py-1">
+                <code className="font-mono text-xs text-gray-800">{linkCmd || "/ulash inv_..."}</code>
+                {linkCmd && (
+                  <button onClick={copyCmd} className="text-gray-400 hover:text-blue-600 transition-colors">
+                    <Copy size={12} />
+                  </button>
+                )}
+              </span>
+            </li>
+          </ol>
+        )}
+      </div>
+
       {/* Hotel ma'lumotlari */}
       <div className="card p-5">
         <h2 className="font-semibold text-gray-900 mb-3">{t("hotelInfo")}</h2>
