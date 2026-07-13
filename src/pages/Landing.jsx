@@ -366,9 +366,6 @@ export default function Landing() {
                     <div className="mt-1.5 text-sm text-muted-foreground">
                       {proPlan.priceUzs.toLocaleString('uz-UZ')} {t('currencyUzs')} / {t('perMonth')}
                     </div>
-                    <div className="mt-1 text-xs text-green-600 font-medium">
-                      {t('perYear')}: ${proPlan.priceUsd * 10} — 2 oy bepul
-                    </div>
                   </>
                 )}
                 <div className="mt-2 text-xs text-muted-foreground/70">{proPlan.desc}</div>
