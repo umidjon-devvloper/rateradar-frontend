@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Tv, Plus, Trash2, Pencil, Check, X, RefreshCw, Circle } from "lucide-react";
+import { Tv, Plus, Trash2, Pencil, Check, X, RefreshCw, Circle, Eye } from "lucide-react";
+import { useHotel } from "../../context/HotelContext";
 import { useToast } from "../../context/ToastContext";
+import { qrApi } from "../../lib/qrApi";
 import api from "../../lib/api";
 
 // Sahifa matnlari (panel tili EmbeddedLayout'dan kelmaydi — sodda lokal TXT)
@@ -65,6 +67,7 @@ const TXT = {
 };
 
 export default function TvDevicesPage() {
+  const { hotel } = useHotel();
   const { toast } = useToast();
   const lang = localStorage.getItem("admin_lang") || "uz";
   const t = (k) => TXT[lang]?.[k] || TXT.en[k] || k;
@@ -73,8 +76,24 @@ export default function TvDevicesPage() {
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
   const [room, setRoom] = useState("");
+  const [rooms, setRooms] = useState([]); // QR yaratilgan xonalar ro'yxati
   const [pairing, setPairing] = useState(false);
   const [editing, setEditing] = useState(null); // { id, room_number, name }
+
+  // QR yaratilgan xonalarni olamiz — TV'ga xona ro'yxatdan TANLANADI,
+  // shunda TV'dagi QR aynan o'sha xonaning QR'i bilan bir xil bo'ladi.
+  useEffect(() => {
+    if (!hotel?.hotel_id) return;
+    qrApi.list(hotel.hotel_id)
+      .then((d) => setRooms((d.items || []).map((it) => String(it.room))))
+      .catch(() => setRooms([])); // QR-servis o'chiq bo'lsa — qo'lda yozish qoladi
+  }, [hotel?.hotel_id]);
+
+  // TV preview — vitrina qanday ko'rinishini yangi oynada ochish
+  const openPreview = () => {
+    const r = room || rooms[0] || "101";
+    window.open(`/tv?preview=${encodeURIComponent(hotel?.hotel_id || "")}&room=${encodeURIComponent(r)}`, "_blank");
+  };
 
   const load = async () => {
     try {
@@ -138,11 +157,18 @@ export default function TvDevicesPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <Tv size={20} className="text-blue-600" /> {t("title")}
-        </h1>
-        <p className="text-sm text-gray-400 mt-0.5">{devices.length} {t("total")}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Tv size={20} className="text-blue-600" /> {t("title")}
+          </h1>
+          <p className="text-sm text-gray-400 mt-0.5">{devices.length} {t("total")}</p>
+        </div>
+        {/* TV vitrina qanday ko'rinishini oldindan ko'rish */}
+        <button onClick={openPreview}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl transition-colors">
+          <Eye size={15} /> TV preview
+        </button>
       </div>
 
       <div className="card p-5">
@@ -155,12 +181,23 @@ export default function TvDevicesPage() {
             placeholder={t("codePlaceholder")}
             className="input flex-1 text-center text-lg font-mono tracking-[0.3em]"
           />
-          <input
-            type="text" value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            placeholder={t("roomPlaceholder")}
-            className="input w-full sm:w-40"
-          />
+          {rooms.length > 0 ? (
+            /* Xona QR yaratilganlardan TANLANADI — TV QR'i xonaga aniq mos bo'ladi */
+            <select value={room} onChange={(e) => setRoom(e.target.value)}
+              className="input w-full sm:w-44">
+              <option value="">{t("roomPlaceholder")}</option>
+              {rooms.map((r) => (
+                <option key={r} value={r}>{t("room")} {r}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text" value={room}
+              onChange={(e) => setRoom(e.target.value)}
+              placeholder={t("roomPlaceholder")}
+              className="input w-full sm:w-40"
+            />
+          )}
           <button onClick={pair} disabled={pairing || code.replace(/\D/g, "").length !== 6}
             className="flex items-center justify-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-colors">
             {pairing ? <RefreshCw size={15} className="animate-spin" /> : <Plus size={15} />}
@@ -213,9 +250,18 @@ export default function TvDevicesPage() {
                     </td>
                     <td className="table-cell">
                       {isEd ? (
-                        <input value={editing.room_number}
-                          onChange={(e) => setEditing((p) => ({ ...p, room_number: e.target.value }))}
-                          className="input py-1.5 text-sm w-24" />
+                        rooms.length > 0 ? (
+                          <select value={editing.room_number}
+                            onChange={(e) => setEditing((p) => ({ ...p, room_number: e.target.value }))}
+                            className="input py-1.5 text-sm w-28">
+                            <option value="">—</option>
+                            {rooms.map((r) => <option key={r} value={r}>{r}</option>)}
+                          </select>
+                        ) : (
+                          <input value={editing.room_number}
+                            onChange={(e) => setEditing((p) => ({ ...p, room_number: e.target.value }))}
+                            className="input py-1.5 text-sm w-24" />
+                        )
                       ) : (
                         d.room_number || <span className="text-gray-400 text-xs">—</span>
                       )}

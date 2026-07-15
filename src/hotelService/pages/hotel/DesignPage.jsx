@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Check, Palette, Image as ImageIcon, Type, Smartphone, ArrowRight, LayoutTemplate } from "lucide-react";
+import { Check, Palette, Image as ImageIcon, Type, Smartphone, ArrowRight, LayoutTemplate, Upload, Loader2 } from "lucide-react";
 import { useHotel } from "../../context/HotelContext";
 import { useToast } from "../../context/ToastContext";
 import { TEMPLATES, DecorHeader, DecorBg } from "../../lib/templates";
-import api from "../../lib/api";
+import api, { assetUrl } from "../../lib/api";
 
 const TXT = {
   uz: {
@@ -69,12 +69,34 @@ export default function DesignPage() {
     theme: "blue", template: "", primary_color: "#2563eb", logo_url: "", welcome_text: "", bg_style: "light",
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoFileRef = useRef(null);
 
   useEffect(() => {
     api.get("/hotel/me").then(({ data }) => {
       if (data.branding) setB((p) => ({ ...p, ...data.branding }));
     }).catch(() => {});
   }, []);
+
+  // Logo faylini yuklash — serverga saqlanadi, ABSOLYUT URL yozamiz
+  // (logo mehmon sahifasi va TV'da boshqa origindan ochiladi).
+  const uploadLogo = async (file) => {
+    if (!file) return;
+    if (file.size > 1.4 * 1024 * 1024) { toast("Rasm 1.4MB dan kichik bo'lsin", "warning"); return; }
+    try {
+      setUploadingLogo(true);
+      const dataUrl = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const { data } = await api.post("/hotel/upload-image", { image: dataUrl });
+      set({ logo_url: assetUrl(data.url) });
+      toast("Logo yuklandi ✅", "success");
+    } catch { toast(t("error"), "error"); }
+    finally { setUploadingLogo(false); if (logoFileRef.current) logoFileRef.current.value = ""; }
+  };
 
   const set = (patch) => setB((p) => ({ ...p, ...patch }));
 
@@ -189,6 +211,18 @@ export default function DesignPage() {
           <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <ImageIcon size={13} /> {t("logo")}
           </label>
+          <div className="flex items-center gap-2 mb-2">
+            <input ref={logoFileRef} type="file" accept="image/*" className="hidden"
+              onChange={(e) => uploadLogo(e.target.files?.[0])} />
+            <button onClick={() => logoFileRef.current?.click()} disabled={uploadingLogo}
+              className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-60">
+              {uploadingLogo ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+              Logo yuklash
+            </button>
+            {b.logo_url && (
+              <img src={b.logo_url} alt="" className="h-9 w-auto max-w-[120px] object-contain rounded bg-gray-50 border border-gray-100 px-1.5" />
+            )}
+          </div>
           <input type="url" value={b.logo_url} onChange={(e) => set({ logo_url: e.target.value })}
             placeholder="https://..." className="input" />
           <p className="text-xs text-gray-400 mt-1.5">{t("logoHint")}</p>

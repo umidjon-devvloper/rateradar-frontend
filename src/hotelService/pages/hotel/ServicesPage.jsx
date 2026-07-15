@@ -28,6 +28,9 @@ export default function ServicesPage() {
   const [newItem,  setNewItem]  = useState({ name: "", price: "", image_url: "" });
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
+  // Xizmatning FON rasmi (TV plitkasi uchun)
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const bgFileRef = useRef(null);
 
   const load = async () => {
     try { setLoading(true); const { data } = await api.get("/hotel/services"); setServices(data); }
@@ -59,6 +62,19 @@ export default function ServicesPage() {
       setNewItem(p => ({ ...p, image_url: data.url }));
     } catch { toast(t("error"), "error"); }
     finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
+  };
+
+  // Xizmatning fon rasmini yuklash (TV va mehmon sahifasida ko'rinadi)
+  const uploadServiceBg = async (file) => {
+    if (!file) return;
+    if (file.size > 1.4 * 1024 * 1024) { toast("Rasm 1.4MB dan kichik bo'lsin", "warning"); return; }
+    try {
+      setUploadingBg(true);
+      const dataUrl = await fileToDataUrl(file);
+      const { data } = await api.post("/hotel/upload-image", { image: dataUrl });
+      set("image_url", data.url);
+    } catch { toast(t("error"), "error"); }
+    finally { setUploadingBg(false); if (bgFileRef.current) bgFileRef.current.value = ""; }
   };
 
   const addItem = () => {
@@ -239,6 +255,32 @@ export default function ServicesPage() {
                 <input type="text" value={modal.data.name}
                   onChange={e => set("name", e.target.value)}
                   className="input" placeholder={t("serviceNamePlaceholder")} />
+              </div>
+
+              {/* Fon rasmi — TV plitkasi va mehmon sahifasida chiroyli ko'rinish */}
+              <div>
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
+                  Fon rasmi (TV uchun)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input ref={bgFileRef} type="file" accept="image/*" className="hidden"
+                    onChange={e => uploadServiceBg(e.target.files?.[0])} />
+                  <button onClick={() => bgFileRef.current?.click()} disabled={uploadingBg}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium transition-colors disabled:opacity-60">
+                    {uploadingBg ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+                    {modal.data.image_url ? "Rasm almashtirish" : "Rasm yuklash"}
+                  </button>
+                  {modal.data.image_url && (
+                    <>
+                      <img src={assetUrl(modal.data.image_url)} alt=""
+                        className="h-10 w-16 rounded-lg object-cover" />
+                      <button onClick={() => set("image_url", "")}
+                        className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                        <X size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Ichki tanlovlar */}

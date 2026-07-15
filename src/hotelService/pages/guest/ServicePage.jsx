@@ -100,14 +100,21 @@ export default function ServicePage() {
   const [reviewDone,    setReviewDone]    = useState(false);
   const [reviewErr,     setReviewErr]     = useState("");
 
-  // Brauzer tilini detect qilish (birinchi kirish uchun)
+  // Til aniqlash: 1) URL ?lang= (TV QR'idan keladi — mehmon TV'da tanlagan til),
+  // 2) saqlangan til, 3) brauzer tili.
   useEffect(() => {
+    const urlLang = searchParams.get("lang");
+    if (urlLang && ALL_LANGUAGES.find(l => l.code === urlLang)) {
+      if (urlLang !== lang) changeLang(urlLang);
+      return;
+    }
     const saved = localStorage.getItem("guest_lang");
     if (!saved) {
       const browserLang = navigator.language?.slice(0, 2) || "en";
       const supported = ALL_LANGUAGES.find(l => l.code === browserLang);
       if (supported && browserLang !== "en") changeLang(browserLang);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
