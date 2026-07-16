@@ -46,15 +46,21 @@ export default function Dashboard() {
   const [refreshError, setRefreshError] = useState('');
   const [forecast, setForecast] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
-  // AI narx tavsiyalari (keshdan) — hero ostidagi "Booking'ga $X qo'ying" chiplar
-  const [aiRecs, setAiRecs] = useState(null);
+  // HAR BIR OTA kanali uchun AI narx tavsiyasi (raqiblar tahlili bilan, 6h kesh)
+  const [otaAdvice, setOtaAdvice] = useState(null);
+  const [otaAdviceLoading, setOtaAdviceLoading] = useState(false);
+
+  const loadOtaAdvice = (refresh = false) => {
+    setOtaAdviceLoading(true);
+    aiApi.otaAdvice(lang, refresh)
+      .then((d) => setOtaAdvice(d))
+      .catch(() => {})
+      .finally(() => setOtaAdviceLoading(false));
+  };
 
   useEffect(() => {
     if (!hotel?._id) return;
-    // Server keshlaydi (aiPriceRecs) — birinchi marta generatsiya, keyin keshdan.
-    aiApi.priceRecommendations(lang)
-      .then((d) => setAiRecs(d))
-      .catch(() => {});
+    loadOtaAdvice(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hotel?._id]);
 
@@ -317,36 +323,89 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* AI tavsiya — har OTA uchun "buncha qo'ying" chiplar (keshdan) */}
-        {aiRecs?.recommendations?.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-border/60">
-            <div className="flex items-start gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary shrink-0 mt-1">
-                <Sparkles className="h-3.5 w-3.5" />
-                {lang === 'uz' ? 'AI tavsiya' : lang === 'ru' ? 'AI совет' : 'AI advice'}:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {aiRecs.recommendations
-                  .filter((r) => r.suggestedPrice > 0)
-                  .slice(0, 5)
-                  .map((r, i) => (
-                    <Link key={i} to="/ai-insights" title={r.description}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-primary/25 bg-primary/5 hover:bg-primary/10 text-xs transition-colors">
-                      <span className="font-medium">{r.platform}</span>
-                      {r.currentPrice > 0 && (
-                        <span className="text-muted-foreground line-through tabular-nums">${r.currentPrice}</span>
-                      )}
-                      <span className="font-bold text-emerald-600 tabular-nums">→ ${r.suggestedPrice}</span>
-                    </Link>
-                  ))}
-              </div>
-            </div>
-            {aiRecs.summary && (
-              <p className="text-[11px] text-muted-foreground mt-1.5 line-clamp-1">{aiRecs.summary}</p>
-            )}
-          </div>
-        )}
       </div>
+
+      {/* ═══ AI TAVSIYA — HAR BIR OTA KANALI UCHUN ═══
+          Raqiblarning aynan shu kanaldagi narxlari tahlil qilinib,
+          har kanalga aniq narx tavsiya qilinadi (Gemini, 6h kesh). */}
+      {(otaAdvice?.channels?.length > 0 || otaAdviceLoading) && (
+        <Card variant="glass" className="overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <span className="text-lg">🤖</span>
+                {lang === 'uz' ? 'AI tavsiya — har bir OTA uchun' : lang === 'ru' ? 'AI совет — для каждого OTA' : 'AI advice — per OTA channel'}
+                {otaAdvice?.asOf && (
+                  <span className="text-[11px] font-normal text-muted-foreground">
+                    {new Date(otaAdvice.asOf).toLocaleString(lang === 'ru' ? 'ru-RU' : 'uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    {' · Gemini AI'}
+                  </span>
+                )}
+              </CardTitle>
+              <Button size="sm" onClick={() => loadOtaAdvice(true)} disabled={otaAdviceLoading}>
+                {otaAdviceLoading
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <><Sparkles className="h-3.5 w-3.5 mr-1.5" />{lang === 'uz' ? 'AI tahlil' : lang === 'ru' ? 'AI анализ' : 'AI analyze'}</>}
+              </Button>
+            </div>
+            {otaAdvice?.summary && (
+              <p className="text-xs text-muted-foreground mt-1">
+                <b>{lang === 'uz' ? 'Umumiy xulosa' : lang === 'ru' ? 'Общий вывод' : 'Summary'}:</b> {otaAdvice.summary}
+              </p>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {(otaAdvice?.channels || []).map((c, i) => {
+              const actionCfg = c.action === 'raise'
+                ? { label: lang === 'uz' ? '⬆ Ko\'tarish' : lang === 'ru' ? '⬆ Поднять' : '⬆ Raise', cls: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' }
+                : c.action === 'lower'
+                ? { label: lang === 'uz' ? '⬇ Tushirish' : lang === 'ru' ? '⬇ Снизить' : '⬇ Lower', cls: 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400' }
+                : { label: lang === 'uz' ? '✓ Saqlash' : lang === 'ru' ? '✓ Оставить' : '✓ Keep', cls: 'bg-muted text-muted-foreground' };
+              return (
+                <div key={i} className="rounded-xl border bg-card/60 p-3.5">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-baseline gap-2.5 flex-wrap">
+                      <span className="font-bold text-sm">{c.channel}</span>
+                      {c.currentPrice > 0 && (
+                        <span className="text-sm text-muted-foreground tabular-nums">${c.currentPrice}</span>
+                      )}
+                      {c.suggestedPrice > 0 && (
+                        <>
+                          <span className="text-muted-foreground text-xs">→</span>
+                          <span className="text-base font-bold text-primary tabular-nums">${c.suggestedPrice}</span>
+                        </>
+                      )}
+                      {c.delta !== 0 && c.suggestedPrice > 0 && (
+                        <span className={cn('text-xs font-semibold tabular-nums', c.delta > 0 ? 'text-emerald-600' : 'text-rose-600')}>
+                          {c.delta > 0 ? '+' : ''}${c.delta}/{lang === 'ru' ? 'ночь' : lang === 'uz' ? 'kecha' : 'night'}
+                        </span>
+                      )}
+                    </div>
+                    <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-full', actionCfg.cls)}>
+                      {actionCfg.label}
+                    </span>
+                  </div>
+                  {c.reason && (
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{c.reason}</p>
+                  )}
+                  {c.stats && (
+                    <p className="text-[11px] text-muted-foreground/70 mt-1 font-mono">
+                      {lang === 'uz' ? 'raqiblar' : lang === 'ru' ? 'конкуренты' : 'competitors'}: ${c.stats.min} – ${c.stats.max} (median ${c.stats.median})
+                      {c.stats.rank && <> · {lang === 'uz' ? `siz ${c.stats.rank}-o'rin / ${c.stats.total}` : lang === 'ru' ? `вы ${c.stats.rank}-е место / ${c.stats.total}` : `you rank ${c.stats.rank} / ${c.stats.total}`}</>}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+            {otaAdviceLoading && !otaAdvice?.channels?.length && (
+              <div className="py-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {lang === 'uz' ? 'Har bir kanal tahlil qilinmoqda...' : lang === 'ru' ? 'Анализ каждого канала...' : 'Analyzing each channel...'}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Jonli narx yangilash progress — animatsiyali */}
       <PriceRefreshProgress open={showProgress} onClose={() => setShowProgress(false)} />

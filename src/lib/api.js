@@ -174,6 +174,11 @@ export const aiApi = {
   // AI-tahlil sahifasidagi shaxsiy yordamchi (hotel konteksti bilan, auth talab)
   assistantChat: (messages) =>
     api.post("/ai/assistant-chat", { messages }, { timeout: 60 * 1000 }).then((r) => r.data.reply),
+  // Har bir OTA kanali uchun AI narx tavsiyasi (dashboard kartasi, 6h kesh)
+  otaAdvice: (lang = "uz", refresh = false) =>
+    api
+      .get("/ai/ota-advice", { params: refresh ? { lang, refresh: true } : { lang }, timeout: 90 * 1000 })
+      .then((r) => r.data),
 };
 
 export const notificationApi = {
