@@ -1,32 +1,50 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Quote, Star } from 'lucide-react';
 import { Reveal, Stagger, StaggerItem } from '@/components/ui/motion';
+import { useLang } from '@/lib/i18n';
+
+const TXT = {
+  uz: {
+    badge: 'Mijozlar Fikri',
+    title: 'Nega hotellar bizni tanlaydi?',
+    roles: ['Boshqaruvchi, Grand Hotel', 'Daromad menejeri, Silk Road Resort', "Egasining o'rinbosari, City Inn"],
+    texts: [
+      "RateRadar orqali daromadimiz roppa-rosa 20% ga oshdi. Endi har kuni ertalab konkurentlar narxini izlab vaqt yo'qotmaymiz, hammasi tayyor keladi.",
+      "Eng yaxshi funksiyasi bu — AI tavsiyalari. Mehmonxona to'lish ehtimoliga qarab qachon narxni ko'tarish kerakligini o'zi aytib turadi.",
+      "Mehmonxona xizmati (QR orqali buyurtma) funksiyasi juda zo'r! Xodimlarimiz ishi osonlashdi, mehmonlar ham telegram orqali tez javob olyapti.",
+    ],
+  },
+  ru: {
+    badge: 'Отзывы клиентов',
+    title: 'Почему отели выбирают нас?',
+    roles: ['Управляющий, Grand Hotel', 'Менеджер по доходам, Silk Road Resort', 'Зам. владельца, City Inn'],
+    texts: [
+      'С RateRadar наш доход вырос ровно на 20%. Больше не тратим время каждое утро на поиск цен конкурентов — всё приходит готовым.',
+      'Лучшая функция — AI-рекомендации. Система сама подсказывает, когда поднять цену в зависимости от вероятности заполнения отеля.',
+      'Сервис отеля (заказ по QR) — просто супер! Работа персонала упростилась, гости быстро получают ответ через Telegram.',
+    ],
+  },
+  en: {
+    badge: 'Testimonials',
+    title: 'Why do hotels choose us?',
+    roles: ['General Manager, Grand Hotel', 'Revenue Manager, Silk Road Resort', 'Deputy Owner, City Inn'],
+    texts: [
+      "With RateRadar our revenue grew by a solid 20%. We no longer waste every morning hunting competitor prices — everything arrives ready.",
+      "The best feature is the AI recommendations. It tells you when to raise prices based on occupancy probability.",
+      "The hotel service (QR ordering) feature is brilliant! Our staff's work got easier, and guests get quick replies via Telegram.",
+    ],
+  },
+};
 
 export function TestimonialSection() {
+  const lang = useLang((s) => s.lang);
+  const tx = TXT[lang] || TXT.en;
+
   const testimonials = [
-    {
-      name: "Azizbek Rahimov",
-      role: "Boshqaruvchi, Grand Hotel",
-      text: "RateRadar orqali daromadimiz roppa-rosa 20% ga oshdi. Endi har kuni ertalab konkurentlar narxini izlab vaqt yo'qotmaymiz, hammasi tayyor keladi.",
-      rating: 5,
-      image: "https://i.pravatar.cc/150?u=a042581f4e29026024d"
-    },
-    {
-      name: "Malika Umarova",
-      role: "Daromad menejeri, Silk Road Resort",
-      text: "Eng yaxshi funksiyasi bu — AI tavsiyalari. Mehmonxona to'lish ehtimoliga qarab qachon narxni ko'tarish kerakligini o'zi aytib turadi.",
-      rating: 5,
-      image: "https://i.pravatar.cc/150?u=a04258114e29026702d"
-    },
-    {
-      name: "Rustam Qosimov",
-      role: "Egasining o'rinbosari, City Inn",
-      text: "Mehmonxona xizmati (QR orqali buyurtma) funksiyasi juda zo'r! Xodimlarimiz ishi osonlashdi, mehmonlar ham telegram orqali tez javob olyapti.",
-      rating: 5,
-      image: "https://i.pravatar.cc/150?u=a04258114e29026302d"
-    }
-  ];
+    { name: "Azizbek Rahimov", image: "https://i.pravatar.cc/150?u=a042581f4e29026024d" },
+    { name: "Malika Umarova", image: "https://i.pravatar.cc/150?u=a04258114e29026702d" },
+    { name: "Rustam Qosimov", image: "https://i.pravatar.cc/150?u=a04258114e29026302d" },
+  ].map((p, i) => ({ ...p, role: tx.roles[i], text: tx.texts[i], rating: 5 }));
 
   return (
     <section className="py-24 border-t bg-muted/10 relative overflow-hidden">
@@ -37,10 +55,10 @@ export function TestimonialSection() {
         <Reveal className="max-w-2xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-[11px] font-semibold uppercase tracking-wider text-primary mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-lime-400" />
-            Mijozlar Fikri
+            {tx.badge}
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            Nega hotellar bizni tanlaydi?
+            {tx.title}
           </h2>
         </Reveal>
 

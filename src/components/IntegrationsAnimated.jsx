@@ -1,8 +1,29 @@
 import { motion } from 'framer-motion';
 import { Network, Database, Globe, CalendarRange, MapPin, Building2, Server } from 'lucide-react';
 import { Reveal } from '@/components/ui/motion';
+import { useLang } from '@/lib/i18n';
+
+const TXT = {
+  uz: {
+    badge: 'Integratsiyalar',
+    title: 'Barcha tizimlar bilan bitta aloqa',
+    desc: "OTA platformalardan narxlarni yig'ish va mehmonxona boshqaruv tizimingizga (PMS) to'g'ridan-to'g'ri bog'lanish orqali jarayonni 100% avtomatlashtiring.",
+  },
+  ru: {
+    badge: 'Интеграции',
+    title: 'Единая связь со всеми системами',
+    desc: 'Автоматизируйте процесс на 100%: сбор цен с OTA-платформ и прямое подключение к вашей системе управления отелем (PMS).',
+  },
+  en: {
+    badge: 'Integrations',
+    title: 'One connection to all systems',
+    desc: 'Automate 100% of the process: collect prices from OTA platforms and connect directly to your property management system (PMS).',
+  },
+};
 
 export function IntegrationsAnimated() {
+  const lang = useLang((s) => s.lang);
+  const tx = TXT[lang] || TXT.en;
   const integrations = [
     { icon: Globe, label: "Booking.com", color: "text-blue-600", bg: "bg-blue-600/10", x: -140, y: -90, delay: 0 },
     { icon: Database, label: "Expedia", color: "text-yellow-600", bg: "bg-yellow-600/10", x: 140, y: -90, delay: 0.2 },
@@ -20,13 +41,13 @@ export function IntegrationsAnimated() {
         <Reveal className="max-w-2xl mx-auto text-center mb-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-[11px] font-semibold uppercase tracking-wider text-primary mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-lime-400" />
-            Integratsiyalar
+            {tx.badge}
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            Barcha tizimlar bilan bitta aloqa
+            {tx.title}
           </h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            OTA platformalardan narxlarni yig'ish va mehmonxona boshqaruv tizimingizga (PMS) to'g'ridan-to'g'ri bog'lanish orqali jarayonni 100% avtomatlashtiring.
+            {tx.desc}
           </p>
         </Reveal>
 

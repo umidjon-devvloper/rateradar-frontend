@@ -2,28 +2,43 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { Reveal } from '@/components/ui/motion';
+import { useLang } from '@/lib/i18n';
+
+const TXT = {
+  uz: {
+    title: "Ko'p so'raladigan savollar",
+    faqs: [
+      { question: "Narxlarni yangilash uchun PMS ga ulanish shartmi?", answer: "Yo'q, shart emas. Tizim internetdagi ochiq manbalardan (Booking, Expedia, Agoda va h.k.) ma'lumotlarni o'zi yig'adi va tahlil qiladi. Agar xohlasangiz, PMS ga ulash orqali to'g'ridan-to'g'ri narxlarni o'zgartirishingiz mumkin." },
+      { question: "Tizim qancha tilda ishlaydi?", answer: "RateRadar interfeysi uchta tilda: O'zbek, Rus va Ingliz tillarida to'liq ishlaydi. Bundan tashqari, Mehmonxona QR xizmatida mijozlarning sharhlari avtomatik ravishda sizning tilingizga tarjima qilib beriladi." },
+      { question: "Bepul sinov muddati qanday ishlaydi?", answer: "Bizda vaqt bilan chegaralangan sinov muddati yo'q, uning o'rniga doimiy 'Bepul' rejamiz bor. Siz ro'yxatdan o'tib, 1 ta mehmonxona va 5 ta raqibni umrbod bepul kuzatishingiz mumkin." },
+      { question: "Raqobatchi mehmonxonalar qanday aniqlanadi?", answer: "Tizim sizning mehmonxonangiz koordinatalari (karta) asosida 300 metrdan 5 km radiusgacha bo'lgan barcha yaqin mehmonxonalarni avtomatik topadi va sizga ro'yxatini taqdim etadi." },
+    ],
+  },
+  ru: {
+    title: 'Часто задаваемые вопросы',
+    faqs: [
+      { question: 'Обязательно ли подключаться к PMS для обновления цен?', answer: 'Нет, не обязательно. Система сама собирает и анализирует данные из открытых источников (Booking, Expedia, Agoda и др.). При желании можно подключить PMS и менять цены напрямую.' },
+      { question: 'На скольких языках работает система?', answer: 'Интерфейс RateRadar полностью работает на трёх языках: узбекском, русском и английском. Кроме того, в QR-сервисе отеля отзывы гостей автоматически переводятся на ваш язык.' },
+      { question: 'Как работает бесплатный пробный период?', answer: "У нас нет ограниченного по времени пробного периода — вместо него есть постоянный тариф «Бесплатный». Зарегистрировавшись, вы можете бессрочно отслеживать 1 отель и 5 конкурентов." },
+      { question: 'Как определяются отели-конкуренты?', answer: 'Система по координатам вашего отеля (на карте) автоматически находит все ближайшие отели в радиусе от 300 метров до 5 км и предоставляет вам список.' },
+    ],
+  },
+  en: {
+    title: 'Frequently asked questions',
+    faqs: [
+      { question: 'Do I need to connect a PMS to update prices?', answer: 'No. The system collects and analyzes data from public sources (Booking, Expedia, Agoda, etc.) on its own. Optionally, you can connect your PMS to change prices directly.' },
+      { question: 'How many languages does the system support?', answer: 'The RateRadar interface fully works in three languages: Uzbek, Russian and English. In addition, guest reviews in the hotel QR service are automatically translated into your language.' },
+      { question: 'How does the free trial work?', answer: "There is no time-limited trial — instead we have a permanent Free plan. After signing up you can track 1 hotel and 5 competitors forever, free of charge." },
+      { question: 'How are competitor hotels detected?', answer: 'Based on your hotel coordinates (map), the system automatically finds all nearby hotels within a 300 m to 5 km radius and gives you the list.' },
+    ],
+  },
+};
 
 export function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState(0);
-
-  const faqs = [
-    {
-      question: "Narxlarni yangilash uchun PMS ga ulanish shartmi?",
-      answer: "Yo'q, shart emas. Tizim internetdagi ochiq manbalardan (Booking, Expedia, Agoda va h.k.) ma'lumotlarni o'zi yig'adi va tahlil qiladi. Agar xohlasangiz, PMS ga ulash orqali to'g'ridan-to'g'ri narxlarni o'zgartirishingiz mumkin."
-    },
-    {
-      question: "Tizim qancha tilda ishlaydi?",
-      answer: "RateRadar interfeysi uchta tilda: O'zbek, Rus va Ingliz tillarida to'liq ishlaydi. Bundan tashqari, Mehmonxona QR xizmatida mijozlarning sharhlari avtomatik ravishda sizning tilingizga tarjima qilib beriladi."
-    },
-    {
-      question: "Bepul sinov muddati qanday ishlaydi?",
-      answer: "Bizda vaqt bilan chegaralangan sinov muddati yo'q, uning o'rniga doimiy 'Bepul' rejamiz bor. Siz ro'yxatdan o'tib, 1 ta mehmonxona va 5 ta raqibni umrbod bepul kuzatishingiz mumkin."
-    },
-    {
-      question: "Raqobatchi mehmonxonalar qanday aniqlanadi?",
-      answer: "Tizim sizning mehmonxonangiz koordinatalari (karta) asosida 300 metrdan 5 km radiusgacha bo'lgan barcha yaqin mehmonxonalarni avtomatik topadi va sizga ro'yxatini taqdim etadi."
-    }
-  ];
+  const lang = useLang((s) => s.lang);
+  const tx = TXT[lang] || TXT.en;
+  const faqs = tx.faqs;
 
   return (
     <section className="py-24 border-t bg-background relative">
@@ -34,7 +49,7 @@ export function FAQAccordion() {
             FAQ
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Ko'p so'raladigan savollar
+            {tx.title}
           </h2>
         </Reveal>
 

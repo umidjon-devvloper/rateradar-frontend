@@ -27,7 +27,7 @@ import PriceRefreshProgress from '@/components/PriceRefreshProgress';
 import InstantSnapshotCard from '@/components/InstantSnapshotCard';
 import AiAdvisor from '@/components/AiAdvisor';
 import CategoryRatingsCard from '@/components/CategoryRatingsCard';
-import { hotelApi, pricesApi } from '@/lib/api';
+import { hotelApi, pricesApi, aiApi } from '@/lib/api';
 import { useT, useLang } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth';
 import { useFormatPrice, cn } from '@/lib/utils';
@@ -46,6 +46,17 @@ export default function Dashboard() {
   const [refreshError, setRefreshError] = useState('');
   const [forecast, setForecast] = useState(null);
   const [showProgress, setShowProgress] = useState(false);
+  // AI narx tavsiyalari (keshdan) — hero ostidagi "Booking'ga $X qo'ying" chiplar
+  const [aiRecs, setAiRecs] = useState(null);
+
+  useEffect(() => {
+    if (!hotel?._id) return;
+    // Server keshlaydi (aiPriceRecs) — birinchi marta generatsiya, keyin keshdan.
+    aiApi.priceRecommendations(lang)
+      .then((d) => setAiRecs(d))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hotel?._id]);
 
   // Raqiblar — keshdan darrov (stale-while-revalidate). Competitors sahifasi
   // bilan bir xil kalit (`competitors:<id>`) — sahifalar orasida o'tishda
@@ -245,29 +256,30 @@ export default function Dashboard() {
           </div>
 
           {hotel && (
-            <div className="flex items-center gap-4 lg:gap-6">
-              <div className="text-right">
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('myPrice')}</div>
-                {hotel.currentPrice > 0 ? (
-                  <div className="text-2xl font-semibold tracking-tight tabular-nums">
-                    {formatPrice(hotel.currentPrice)}
-                  </div>
-                ) : (
-                  <Link
-                    to="/settings"
-                    className="text-sm text-primary hover:underline tabular-nums inline-flex items-center gap-1"
-                  >
-                    {t('enterPriceShort')} →
-                  </Link>
-                )}
-                <div className="text-[10px] text-muted-foreground">{t('bookingPerNight')}</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div className="text-right">
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('competitorsTracked')}</div>
-                <div className="text-2xl font-semibold tracking-tight tabular-nums">{competitors.length}</div>
-                <div className="text-[10px] text-muted-foreground">300m</div>
-              </div>
+            /* Ixcham 4 mini-stat — katta kartalar o'rniga hero ichida, o'ngda */
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 shrink-0">
+              <MiniStat
+                label={t('myPrice')}
+                value={hotel.currentPrice > 0 ? formatPrice(hotel.currentPrice) : '—'}
+                sub={t('bookingPerNight')}
+                accent
+              />
+              <MiniStat
+                label={t('avgPrice')}
+                value={avgPrice > 0 ? formatPrice(avgPrice) : '—'}
+                sub={`${competitors.length} ${t('nCompetitors')}`}
+                delta={myPrice && avgPrice ? (myPrice > avgPrice ? 'high' : myPrice < avgPrice ? 'low' : null) : null}
+              />
+              <MiniStat
+                label={t('competitorsTracked')}
+                value={competitors.length}
+                sub="300m"
+              />
+              <MiniStat
+                label={t('yourPosition')}
+                value={`#${yourRank}/${totalHotels}`}
+                sub={t('byPrice')}
+              />
             </div>
           )}
         </div>
@@ -304,50 +316,40 @@ export default function Dashboard() {
             )}
           </div>
         )}
+
+        {/* AI tavsiya — har OTA uchun "buncha qo'ying" chiplar (keshdan) */}
+        {aiRecs?.recommendations?.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-border/60">
+            <div className="flex items-start gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary shrink-0 mt-1">
+                <Sparkles className="h-3.5 w-3.5" />
+                {lang === 'uz' ? 'AI tavsiya' : lang === 'ru' ? 'AI совет' : 'AI advice'}:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {aiRecs.recommendations
+                  .filter((r) => r.suggestedPrice > 0)
+                  .slice(0, 5)
+                  .map((r, i) => (
+                    <Link key={i} to="/ai-insights" title={r.description}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-primary/25 bg-primary/5 hover:bg-primary/10 text-xs transition-colors">
+                      <span className="font-medium">{r.platform}</span>
+                      {r.currentPrice > 0 && (
+                        <span className="text-muted-foreground line-through tabular-nums">${r.currentPrice}</span>
+                      )}
+                      <span className="font-bold text-emerald-600 tabular-nums">→ ${r.suggestedPrice}</span>
+                    </Link>
+                  ))}
+              </div>
+            </div>
+            {aiRecs.summary && (
+              <p className="text-[11px] text-muted-foreground mt-1.5 line-clamp-1">{aiRecs.summary}</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Jonli narx yangilash progress — animatsiyali */}
       <PriceRefreshProgress open={showProgress} onClose={() => setShowProgress(false)} />
-
-      {/* Stats cards */}
-      <Stagger className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StaggerItem>
-          <StatCard
-            icon={DollarSign}
-            label={t('myPrice')}
-            count={myPrice}
-            format={formatPrice}
-            sub={t('perNight')}
-            accent="primary"
-          />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard
-            icon={TrendingUp}
-            label={t('avgPrice')}
-            count={avgPrice}
-            format={formatPrice}
-            sub={`${competitors.length} ${t('nCompetitors')}`}
-            delta={myPrice > avgPrice ? 'high' : myPrice < avgPrice ? 'low' : null}
-          />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard
-            icon={Users}
-            label={t('competitorsTracked')}
-            count={competitors.length}
-            sub="300m"
-          />
-        </StaggerItem>
-        <StaggerItem>
-          <StatCard
-            icon={TrendingDown}
-            label={t('yourPosition')}
-            value={`#${yourRank}/${totalHotels}`}
-            sub={t('byPrice')}
-          />
-        </StaggerItem>
-      </Stagger>
 
       {/* Narx prognozi + eng arzon/qimmat raqib — yonma-yon (ixcham, premium) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -545,5 +547,30 @@ function StatCard({ icon: Icon, label, value, count, format, sub, delta, accent 
         {sub && <div className="text-[11px] text-muted-foreground/70 mt-0.5">{sub}</div>}
       </CardContent>
     </Card>
+  );
+}
+
+// Hero ichidagi IXCHAM stat — katta StatCard'larning kichik varianti
+function MiniStat({ label, value, sub, delta, accent }) {
+  return (
+    <div className={cn(
+      'rounded-xl px-3.5 py-2.5 min-w-[118px] border',
+      accent
+        ? 'bg-primary/5 border-primary/20'
+        : 'bg-card/60 border-border/60'
+    )}>
+      <div className="text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+        {label}
+        {delta && (
+          <span className={delta === 'high' ? 'text-amber-500' : 'text-emerald-500'}>
+            {delta === 'high' ? '↑' : '↓'}
+          </span>
+        )}
+      </div>
+      <div className="text-lg font-bold tracking-tight tabular-nums leading-tight mt-0.5">
+        {value}
+      </div>
+      {sub && <div className="text-[9px] text-muted-foreground/70 truncate">{sub}</div>}
+    </div>
   );
 }
