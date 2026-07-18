@@ -12,6 +12,8 @@ import {
   Download,
   Loader2,
   CheckCircle2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -49,6 +51,16 @@ export default function Dashboard() {
   // HAR BIR OTA kanali uchun AI narx tavsiyasi (raqiblar tahlili bilan, 6h kesh)
   const [otaAdvice, setOtaAdvice] = useState(null);
   const [otaAdviceLoading, setOtaAdviceLoading] = useState(false);
+  // Tahlil panelini yig'ib qo'yish — holat eslab qolinadi
+  const [otaAdviceCollapsed, setOtaAdviceCollapsed] = useState(
+    () => localStorage.getItem('rr_ota_advice_collapsed') === '1'
+  );
+  const toggleOtaAdvice = () => {
+    setOtaAdviceCollapsed((p) => {
+      localStorage.setItem('rr_ota_advice_collapsed', p ? '0' : '1');
+      return !p;
+    });
+  };
 
   const loadOtaAdvice = (refresh = false) => {
     setOtaAdviceLoading(true);
@@ -222,7 +234,7 @@ export default function Dashboard() {
             )}
             <div className="min-w-0">
               <h1 className="text-2xl font-semibold tracking-tight truncate">
-                {t('welcome')}, {user?.name?.split(' ')[0]} 👋
+                {t('welcome')}, {user?.name?.split(' ')[0]}
               </h1>
               {hotel ? (
                 <>
@@ -333,27 +345,41 @@ export default function Dashboard() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <span className="text-lg">🤖</span>
+                <Sparkles className="h-4 w-4 text-primary" />
                 {lang === 'uz' ? 'AI tavsiya — har bir OTA uchun' : lang === 'ru' ? 'AI совет — для каждого OTA' : 'AI advice — per OTA channel'}
-                {otaAdvice?.asOf && (
-                  <span className="text-[11px] font-normal text-muted-foreground">
-                    {new Date(otaAdvice.asOf).toLocaleString(lang === 'ru' ? 'ru-RU' : 'uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    {' · Gemini AI'}
-                  </span>
-                )}
               </CardTitle>
-              <Button size="sm" onClick={() => loadOtaAdvice(true)} disabled={otaAdviceLoading}>
-                {otaAdviceLoading
-                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  : <><Sparkles className="h-3.5 w-3.5 mr-1.5" />{lang === 'uz' ? 'AI tahlil' : lang === 'ru' ? 'AI анализ' : 'AI analyze'}</>}
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* Tahlilni yig'ish/ochish */}
+                <Button size="sm" variant="outline" onClick={toggleOtaAdvice}>
+                  {otaAdviceCollapsed
+                    ? <><ChevronDown className="h-3.5 w-3.5 mr-1" />{lang === 'uz' ? 'Ochish' : lang === 'ru' ? 'Развернуть' : 'Expand'}</>
+                    : <><ChevronUp className="h-3.5 w-3.5 mr-1" />{lang === 'uz' ? "Yig'ish" : lang === 'ru' ? 'Свернуть' : 'Collapse'}</>}
+                </Button>
+                <Button size="sm" onClick={() => loadOtaAdvice(true)} disabled={otaAdviceLoading}>
+                  {otaAdviceLoading
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : <><Sparkles className="h-3.5 w-3.5 mr-1.5" />{lang === 'uz' ? 'AI tahlil' : lang === 'ru' ? 'AI анализ' : 'AI analyze'}</>}
+                </Button>
+              </div>
             </div>
-            {otaAdvice?.summary && (
+            {!otaAdviceCollapsed && otaAdvice?.summary && (
               <p className="text-xs text-muted-foreground mt-1">
                 <b>{lang === 'uz' ? 'Umumiy xulosa' : lang === 'ru' ? 'Общий вывод' : 'Summary'}:</b> {otaAdvice.summary}
               </p>
             )}
+            {otaAdviceCollapsed && otaAdvice?.channels?.length > 0 && (
+              /* Yig'ilgan holat — bir qatorlik qisqa ko'rinish */
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {otaAdvice.channels.slice(0, 6).map((c, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/5 border border-primary/15 text-[11px]">
+                    <span className="font-medium">{c.channel}</span>
+                    {c.suggestedPrice > 0 && <span className="font-bold text-primary tabular-nums">${c.suggestedPrice}</span>}
+                  </span>
+                ))}
+              </div>
+            )}
           </CardHeader>
+          {!otaAdviceCollapsed && (
           <CardContent className="space-y-2.5">
             {(otaAdvice?.channels || []).map((c, i) => {
               const actionCfg = c.action === 'raise'
@@ -404,6 +430,7 @@ export default function Dashboard() {
               </div>
             )}
           </CardContent>
+          )}
         </Card>
       )}
 

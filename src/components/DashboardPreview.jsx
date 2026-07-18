@@ -3,15 +3,38 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LineChart, Star, Sparkles } from 'lucide-react';
 import { Reveal } from '@/components/ui/motion';
 import { cn } from '@/lib/utils';
+import { useLang } from '@/lib/i18n';
 
-const tabs = [
-  { id: 'prices', label: 'Narxlar tahlili', icon: LineChart, color: 'text-blue-500', bg: 'bg-blue-500' },
-  { id: 'reviews', label: 'Sharhlar', icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500' },
-  { id: 'ai', label: 'AI maslahatlar', icon: Sparkles, color: 'text-violet-500', bg: 'bg-violet-500' },
-];
+const TXT = {
+  uz: {
+    title: "Tizim qanday ko'rinishga ega?",
+    desc: "RateRadar - bu oddiy quruq raqamlar emas, o'ta chiroyli va qulay interfeysli tahlil tizimi. Har bir funksiya mehmonxona boshqaruvini zavqliroq qilish uchun dizayn qilingan.",
+    tabPrices: 'Narxlar tahlili', tabReviews: 'Sharhlar', tabAi: 'AI maslahatlar',
+    aiCard: 'Gemini Strategiyasi',
+  },
+  ru: {
+    title: 'Как выглядит система?',
+    desc: 'RateRadar — это не сухие цифры, а красивая и удобная аналитическая система. Каждая функция создана, чтобы управление отелем приносило удовольствие.',
+    tabPrices: 'Анализ цен', tabReviews: 'Отзывы', tabAi: 'AI советы',
+    aiCard: 'Стратегия Gemini',
+  },
+  en: {
+    title: 'What does the system look like?',
+    desc: 'RateRadar is not dry numbers — it is a beautiful, easy-to-use analytics system. Every feature is designed to make hotel management enjoyable.',
+    tabPrices: 'Price analytics', tabReviews: 'Reviews', tabAi: 'AI advice',
+    aiCard: 'Gemini Strategy',
+  },
+};
 
 export function DashboardPreview() {
-  const [activeTab, setActiveTab] = useState(tabs[0].id);
+  const lang = useLang((s) => s.lang);
+  const tx = TXT[lang] || TXT.en;
+  const tabs = [
+    { id: 'prices', label: tx.tabPrices, icon: LineChart, color: 'text-blue-500', bg: 'bg-blue-500' },
+    { id: 'reviews', label: tx.tabReviews, icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500' },
+    { id: 'ai', label: tx.tabAi, icon: Sparkles, color: 'text-violet-500', bg: 'bg-violet-500' },
+  ];
+  const [activeTab, setActiveTab] = useState('prices');
 
   return (
     <section className="py-24 border-t bg-background relative overflow-hidden">
@@ -20,10 +43,10 @@ export function DashboardPreview() {
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <Reveal className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-            Tizim qanday ko'rinishga ega?
+            {tx.title}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            RateRadar - bu oddiy quruq raqamlar emas, o'ta chiroyli va qulay interfeysli tahlil tizimi. Har bir funksiya mehmonxona boshqaruvini zavqliroq qilish uchun dizayn qilingan.
+            {tx.desc}
           </p>
         </Reveal>
 
@@ -137,7 +160,7 @@ export function DashboardPreview() {
                     <div className="w-16 h-16 rounded-2xl bg-violet-500/10 text-violet-500 mx-auto flex items-center justify-center mb-6">
                       <Sparkles className="w-8 h-8" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-4">Gemini Strategiyasi</h3>
+                    <h3 className="text-2xl font-bold mb-4">{tx.aiCard}</h3>
                     <div className="space-y-4 text-left">
                       <div className="p-4 rounded-lg bg-muted/50 border flex items-start gap-3">
                         <div className="w-2 h-2 rounded-full bg-green-500 mt-2" />

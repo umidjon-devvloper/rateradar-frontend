@@ -1,25 +1,62 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Building2, BarChart3, TrendingUp, Zap, QrCode, Globe, Bot } from 'lucide-react';
-import { useT } from '@/lib/i18n';
+import { useLang } from '@/lib/i18n';
+
+const TXT = {
+  uz: {
+    s1title: 'Barcha raqobatchilar bir ekranda', s1desc: 'Bozorni 24/7 rejimida avtomatik kuzatib boring',
+    yourPrice: 'Sizning narxingiz', marketAvg: "Bozor o'rtachasi", position: 'Pozitsiya', competitors: 'Raqobatchilar',
+    priceChanges: "Narxlar o'zgarishi", live: 'Jonli',
+    s2title: 'AI yordamida chuqur tahlil', s2desc: "Narxlarni qanday o'zgartirish haqida aqlli maslahatlar",
+    aiRec: 'AI Tavsiyasi', realtime: 'Real vaqt rejimida',
+    aiMsg: (p) => <>"Sizning asosiy raqobatchingiz (Hilton) narxni $5 ga tushirdi. Bronlash foizini saqlab qolish uchun narxni <strong className="text-primary">{p}</strong> qilib belgilashingizni tavsiya qilamiz."</>,
+    accept: 'Qabul qilish', decline: 'Rad etish',
+    s3title: '6+ OTA platformalar', s3desc: "Barcha yirik bronlash tizimlaridan ma'lumotlarni yig'ish",
+    sync: "Ma'lumotlar avtomatik tarzda markaziy tizimga sinxronlanadi.",
+  },
+  ru: {
+    s1title: 'Все конкуренты на одном экране', s1desc: 'Автоматический мониторинг рынка 24/7',
+    yourPrice: 'Ваша цена', marketAvg: 'Средняя по рынку', position: 'Позиция', competitors: 'Конкуренты',
+    priceChanges: 'Изменение цен', live: 'Live',
+    s2title: 'Глубокий анализ с помощью AI', s2desc: 'Умные советы, как менять цены',
+    aiRec: 'AI Рекомендация', realtime: 'В реальном времени',
+    aiMsg: (p) => <>"Ваш основной конкурент (Hilton) снизил цену на $5. Чтобы сохранить долю бронирований, рекомендуем установить цену <strong className="text-primary">{p}</strong>."</>,
+    accept: 'Принять', decline: 'Отклонить',
+    s3title: '6+ OTA платформ', s3desc: 'Сбор данных со всех крупных систем бронирования',
+    sync: 'Данные автоматически синхронизируются с центральной системой.',
+  },
+  en: {
+    s1title: 'All competitors on one screen', s1desc: 'Monitor the market automatically, 24/7',
+    yourPrice: 'Your price', marketAvg: 'Market average', position: 'Position', competitors: 'Competitors',
+    priceChanges: 'Price changes', live: 'Live',
+    s2title: 'Deep analysis powered by AI', s2desc: 'Smart advice on how to adjust your prices',
+    aiRec: 'AI Recommendation', realtime: 'Real-time',
+    aiMsg: (p) => <>"Your main competitor (Hilton) dropped their price by $5. To protect your booking share, we recommend setting your price to <strong className="text-primary">{p}</strong>."</>,
+    accept: 'Accept', decline: 'Decline',
+    s3title: '6+ OTA platforms', s3desc: 'Collecting data from all major booking systems',
+    sync: 'Data syncs automatically to the central system.',
+  },
+};
 
 export function HeroCarousel() {
-  const t = useT();
+  const lang = useLang((s) => s.lang);
+  const tx = TXT[lang] || TXT.en;
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
     {
       id: 'dashboard',
-      title: 'Barcha raqobatchilar bir ekranda',
-      desc: 'Bozorni 24/7 rejimida avtomatik kuzatib boring',
+      title: tx.s1title,
+      desc: tx.s1desc,
       content: (
         <div className="p-5 sm:p-7 h-full flex flex-col justify-center">
           <div className="grid grid-cols-2 gap-3 mb-5">
             {[
-              { icon: Building2, label: 'Sizning narxingiz', value: '$95', accent: true },
-              { icon: BarChart3, label: 'Bozor o\'rtachasi', value: '$87' },
-              { icon: TrendingUp, label: 'Pozitsiya', value: '#3/12' },
-              { icon: Zap, label: 'Raqobatchilar', value: '8' },
+              { icon: Building2, label: tx.yourPrice, value: '$95', accent: true },
+              { icon: BarChart3, label: tx.marketAvg, value: '$87' },
+              { icon: TrendingUp, label: tx.position, value: '#3/12' },
+              { icon: Zap, label: tx.competitors, value: '8' },
             ].map((s, i) => (
               <div key={i} className="rounded-lg border bg-card p-3.5 text-left shadow-sm hover:shadow-md transition-shadow">
                 <div className={`w-7 h-7 rounded-md mb-2 flex items-center justify-center ${
@@ -35,8 +72,8 @@ export function HeroCarousel() {
           <div className="rounded-lg border bg-card p-4 text-left relative overflow-hidden shadow-sm">
              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-full animate-shimmer" />
              <div className="flex justify-between mb-4">
-               <div className="text-sm font-medium">Narxlar o'zgarishi</div>
-               <div className="text-[11px] text-muted-foreground flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Jonli</div>
+               <div className="text-sm font-medium">{tx.priceChanges}</div>
+               <div className="text-[11px] text-muted-foreground flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> {tx.live}</div>
              </div>
              <div className="flex items-end gap-1 h-12">
                {[40, 60, 45, 80, 55, 90, 75].map((h, i) => (
@@ -49,8 +86,8 @@ export function HeroCarousel() {
     },
     {
       id: 'ai-insights',
-      title: 'AI yordamida chuqur tahlil',
-      desc: 'Narxlarni qanday o\'zgartirish haqida aqlli maslahatlar',
+      title: tx.s2title,
+      desc: tx.s2desc,
       content: (
         <div className="p-5 sm:p-7 h-full flex items-center justify-center">
            <div className="w-full relative">
@@ -61,16 +98,16 @@ export function HeroCarousel() {
                     <Bot className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="font-semibold text-sm">AI Tavsiyasi</div>
-                    <div className="text-xs text-muted-foreground">Real vaqt rejimida</div>
+                    <div className="font-semibold text-sm">{tx.aiRec}</div>
+                    <div className="text-xs text-muted-foreground">{tx.realtime}</div>
                   </div>
                 </div>
                 <p className="text-sm text-foreground/80 leading-relaxed mb-4">
-                  "Sizning asosiy raqobatchingiz (Hilton) narxni $5 ga tushirdi. Bronlash foizini saqlab qolish uchun narxni <strong className="text-primary">$92</strong> qilib belgilashingizni tavsiya qilamiz."
+                  {tx.aiMsg('$92')}
                 </p>
                 <div className="flex gap-2">
-                  <button className="flex-1 bg-primary text-white rounded-lg py-2 text-xs font-medium hover:bg-primary/90 transition shadow-sm hover:shadow-md">Qabul qilish</button>
-                  <button className="flex-1 bg-muted rounded-lg py-2 text-xs font-medium hover:bg-muted/80 transition">Rad etish</button>
+                  <button className="flex-1 bg-primary text-white rounded-lg py-2 text-xs font-medium hover:bg-primary/90 transition shadow-sm hover:shadow-md">{tx.accept}</button>
+                  <button className="flex-1 bg-muted rounded-lg py-2 text-xs font-medium hover:bg-muted/80 transition">{tx.decline}</button>
                 </div>
              </div>
            </div>
@@ -79,8 +116,8 @@ export function HeroCarousel() {
     },
     {
       id: 'platforms',
-      title: '6+ OTA platformalar',
-      desc: 'Barcha yirik bronlash tizimlaridan ma\'lumotlarni yig\'ish',
+      title: tx.s3title,
+      desc: tx.s3desc,
       content: (
         <div className="p-5 sm:p-7 h-full flex flex-col justify-center items-center text-center">
           <div className="relative w-full aspect-square max-w-[240px]">
@@ -95,7 +132,7 @@ export function HeroCarousel() {
                <div className="absolute top-1/2 -right-6 -translate-y-1/2 px-3 py-1.5 bg-card border rounded-lg shadow-md text-xs font-bold text-green-600 rotate-6">Trip</div>
             </motion.div>
           </div>
-          <p className="mt-8 text-sm text-muted-foreground font-medium">Ma'lumotlar avtomatik tarzda markaziy tizimga sinxronlanadi.</p>
+          <p className="mt-8 text-sm text-muted-foreground font-medium">{tx.sync}</p>
         </div>
       )
     }

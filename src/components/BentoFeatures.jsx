@@ -2,8 +2,62 @@ import { motion } from 'framer-motion';
 import { LineChart, Zap, Globe2, ShieldCheck, Sparkles, MessageSquare } from 'lucide-react';
 import { SpotlightCard } from '@/components/ui/SpotlightCard';
 import { Reveal } from '@/components/ui/motion';
+import { useLang } from '@/lib/i18n';
+
+const TXT = {
+  uz: {
+    badge: 'Imkoniyatlar',
+    title: "Sizga kerak bo'lgan hamma narsa",
+    desc: "Hotelingizning bozordagi pozitsiyasini yaxshilash uchun mo'ljallangan to'liq vosita. Asosiy e'tibor avtomatlashtirish va AI orqali tezkor qarorlar qabul qilishga qaratilgan.",
+    f1t: 'Real vaqt narx monitoringi',
+    f1d: "Raqobatchilaringiz qachon narxni tushirayotganini darhol bilib oling. Booking, Expedia va Agoda narxlari har 2 soatda avtomatik yangilanib turadi.",
+    f2t: 'AI tavsiyalari',
+    f2d: "Gemini sizning bozor pozitsiyangizni o'rganadi va kunlik narx strategiyasini yozib beradi. O'ylashga vaqt ketkazmaysiz.",
+    f3t: 'Multi-OTA',
+    f3d: "6+ platforma (Booking, Expedia, Agoda...) qo'llab-quvvatlanadi.",
+    f4t: 'Sharhlar Tahlili',
+    f4d: 'Mijoz sharhlari avto-tarjima qilinadi va hissiyot aniqlanadi.',
+    f5t: 'Tezkor bildirishnomalar',
+    f5d: "Raqib narxni tushirsa yoki salbiy sharh chiqsa darhol xabar olasiz. Vaqtni yo'qotmay narxni birinchi bo'lib tushiring.",
+    n1: 'Raqib narxni tushirdi!', n2: 'Yangi sharh (4.0)',
+  },
+  ru: {
+    badge: 'Возможности',
+    title: 'Всё, что вам нужно',
+    desc: 'Полный инструмент для улучшения позиции вашего отеля на рынке. Главный фокус — автоматизация и быстрые решения с помощью AI.',
+    f1t: 'Мониторинг цен в реальном времени',
+    f1d: 'Мгновенно узнавайте, когда конкуренты снижают цены. Цены Booking, Expedia и Agoda обновляются автоматически каждые 2 часа.',
+    f2t: 'AI-рекомендации',
+    f2d: 'Gemini изучает вашу позицию на рынке и пишет ежедневную ценовую стратегию. Не тратьте время на раздумья.',
+    f3t: 'Multi-OTA',
+    f3d: 'Поддерживается 6+ платформ (Booking, Expedia, Agoda...).',
+    f4t: 'Анализ отзывов',
+    f4d: 'Отзывы гостей автоматически переводятся, определяется тональность.',
+    f5t: 'Мгновенные уведомления',
+    f5d: 'Получайте уведомление сразу, когда конкурент снижает цену или появляется негативный отзыв. Реагируйте первым.',
+    n1: 'Конкурент снизил цену!', n2: 'Новый отзыв (4.0)',
+  },
+  en: {
+    badge: 'Features',
+    title: 'Everything you need',
+    desc: 'A complete toolkit to improve your hotel\'s market position. The focus is automation and fast decisions powered by AI.',
+    f1t: 'Real-time price monitoring',
+    f1d: 'Know instantly when competitors drop their prices. Booking, Expedia and Agoda prices update automatically every 2 hours.',
+    f2t: 'AI recommendations',
+    f2d: 'Gemini studies your market position and writes a daily pricing strategy. No time wasted on guesswork.',
+    f3t: 'Multi-OTA',
+    f3d: '6+ platforms supported (Booking, Expedia, Agoda...).',
+    f4t: 'Review analytics',
+    f4d: 'Guest reviews are auto-translated and sentiment is detected.',
+    f5t: 'Instant notifications',
+    f5d: 'Get notified the moment a competitor drops a price or a negative review appears. React first.',
+    n1: 'Competitor dropped price!', n2: 'New review (4.0)',
+  },
+};
 
 export function BentoFeatures() {
+  const lang = useLang((s) => s.lang);
+  const tx = TXT[lang] || TXT.en;
   return (
     <section id="features" className="py-24 relative bg-muted/10 border-t">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10"></div>
@@ -12,13 +66,13 @@ export function BentoFeatures() {
         <Reveal className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-[11px] font-semibold uppercase tracking-wider text-primary mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-lime-400" />
-            Imkoniyatlar
+            {tx.badge}
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            Sizga kerak bo'lgan hamma narsa
+            {tx.title}
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Hotelingizning bozordagi pozitsiyasini yaxshilash uchun mo'ljallangan to'liq vosita. Asosiy e'tibor avtomatlashtirish va AI orqali tezkor qarorlar qabul qilishga qaratilgan.
+            {tx.desc}
           </p>
         </Reveal>
 
@@ -30,9 +84,9 @@ export function BentoFeatures() {
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <LineChart className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">Real vaqt narx monitoringi</h3>
+                <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">{tx.f1t}</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Raqobatchilaringiz qachon narxni tushirayotganini darhol bilib oling. Booking, Expedia va Agoda narxlari har 2 soatda avtomatik yangilanib turadi.
+                  {tx.f1d}
                 </p>
               </div>
               <div className="mt-auto relative rounded-xl border bg-background overflow-hidden h-40 flex items-center justify-center shadow-inner group-hover:border-primary/30 transition-colors">
@@ -55,9 +109,9 @@ export function BentoFeatures() {
                 </div>
                 <span className="px-3 py-1 bg-violet-500/10 text-violet-600 text-xs font-bold rounded-full">Gemini AI</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">AI tavsiyalari</h3>
+              <h3 className="text-xl font-bold mb-2">{tx.f2t}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                Gemini sizning bozor pozitsiyangizni o'rganadi va kunlik narx strategiyasini yozib beradi. O'ylashga vaqt ketkazmaysiz.
+                {tx.f2d}
               </p>
               <div className="mt-auto bg-muted/50 rounded-xl p-4 text-xs font-mono text-muted-foreground border group-hover:border-violet-500/30 transition-colors">
                 &gt; Analizing competitors...<br/>
@@ -70,9 +124,9 @@ export function BentoFeatures() {
           <Reveal className="md:col-span-1 lg:col-span-1 h-full" delay={0.3}>
             <SpotlightCard className="h-full p-8 flex flex-col items-center justify-center text-center group bg-card">
               <Globe2 className="w-12 h-12 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-lg font-bold mb-2">Multi-OTA</h3>
+              <h3 className="text-lg font-bold mb-2">{tx.f3t}</h3>
               <p className="text-sm text-muted-foreground">
-                6+ platforma (Booking, Expedia, Agoda...) qo'llab-quvvatlanadi.
+                {tx.f3d}
               </p>
             </SpotlightCard>
           </Reveal>
@@ -81,9 +135,9 @@ export function BentoFeatures() {
           <Reveal className="md:col-span-1 lg:col-span-1 h-full" delay={0.4}>
             <SpotlightCard className="h-full p-8 flex flex-col items-center justify-center text-center group bg-card">
               <MessageSquare className="w-12 h-12 text-pink-500 mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-lg font-bold mb-2">Sharhlar Tahlili</h3>
+              <h3 className="text-lg font-bold mb-2">{tx.f4t}</h3>
               <p className="text-sm text-muted-foreground">
-                Mijoz sharhlari avto-tarjima qilinadi va hissiyot aniqlanadi.
+                {tx.f4d}
               </p>
             </SpotlightCard>
           </Reveal>
@@ -95,18 +149,18 @@ export function BentoFeatures() {
                 <Zap className="w-8 h-8" />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-xl font-bold mb-2">Tezkor bildirishnomalar</h3>
+                <h3 className="text-xl font-bold mb-2">{tx.f5t}</h3>
                 <p className="text-muted-foreground">
-                  Raqib narxni tushirsa yoki salbiy sharh chiqsa darhol xabar olasiz. Vaqtni yo'qotmay narxni birinchi bo'lib tushiring.
+                  {tx.f5d}
                 </p>
               </div>
               
               <div className="hidden lg:flex gap-4">
                 <div className="px-4 py-2 rounded-lg bg-rose-500/10 text-rose-600 text-sm font-bold border border-rose-500/20 shadow-sm animate-pulse">
-                  Raqib narxni tushirdi!
+                  {tx.n1}
                 </div>
                 <div className="px-4 py-2 rounded-lg bg-yellow-500/10 text-yellow-600 text-sm font-bold border border-yellow-500/20 shadow-sm">
-                  Yangi sharh (4.0)
+                  {tx.n2}
                 </div>
               </div>
             </SpotlightCard>
