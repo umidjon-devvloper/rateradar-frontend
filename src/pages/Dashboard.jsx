@@ -367,17 +367,6 @@ export default function Dashboard() {
                 <b>{lang === 'uz' ? 'Umumiy xulosa' : lang === 'ru' ? 'Общий вывод' : 'Summary'}:</b> {otaAdvice.summary}
               </p>
             )}
-            {otaAdviceCollapsed && otaAdvice?.channels?.length > 0 && (
-              /* Yig'ilgan holat — bir qatorlik qisqa ko'rinish */
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                {otaAdvice.channels.slice(0, 6).map((c, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/5 border border-primary/15 text-[11px]">
-                    <span className="font-medium">{c.channel}</span>
-                    {c.suggestedPrice > 0 && <span className="font-bold text-primary tabular-nums">${c.suggestedPrice}</span>}
-                  </span>
-                ))}
-              </div>
-            )}
           </CardHeader>
           {!otaAdviceCollapsed && (
           <CardContent className="space-y-2.5">
