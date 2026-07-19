@@ -172,8 +172,8 @@ export const aiApi = {
   chat: (messages) =>
     axios.post(`${API_URL}/ai/chat`, { messages }).then((r) => r.data.reply),
   // AI-tahlil sahifasidagi shaxsiy yordamchi (hotel konteksti bilan, auth talab)
-  assistantChat: (messages) =>
-    api.post("/ai/assistant-chat", { messages }, { timeout: 60 * 1000 }).then((r) => r.data.reply),
+  assistantChat: (messages, lang = "uz") =>
+    api.post("/ai/assistant-chat", { messages, lang }, { timeout: 60 * 1000 }).then((r) => r.data.reply),
   // Har bir OTA kanali uchun AI narx tavsiyasi (dashboard kartasi, 6h kesh)
   otaAdvice: (lang = "uz", refresh = false) =>
     api

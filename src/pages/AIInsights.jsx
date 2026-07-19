@@ -59,7 +59,7 @@ export default function AIInsights() {
     setChatInput('');
     setChatBusy(true);
     try {
-      const reply = await aiApi.assistantChat(next.slice(-16));
+      const reply = await aiApi.assistantChat(next.slice(-16), lang);
       setChatMessages((p) => [...p, { role: 'assistant', content: reply }]);
     } catch {
       setChatMessages((p) => [...p, {
