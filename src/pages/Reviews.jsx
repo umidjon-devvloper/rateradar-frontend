@@ -10,6 +10,7 @@ import { reviewApi, hotelApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { getCache, setCache } from '@/lib/clientCache';
 import { getOtaBrand } from '@/lib/otaBrands';
+import ReviewsScoreBoard from '@/components/ReviewsScoreBoard';
 
 const AVATAR_COLORS = [
   'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500',
@@ -214,6 +215,9 @@ export default function Reviews() {
       {scrapeMsg && (
         <div className="text-xs text-muted-foreground -mt-2 ml-1">{scrapeMsg}</div>
       )}
+
+      {/* Sharhlar Score Board — obro' paneli (ball, KPI, trend, platforma donut) */}
+      <ReviewsScoreBoard reviews={allReviews} stats={stats} total={total} lang={lang} />
 
       {/* Bir bosishda barcha platformadan sharh olish — har birini alohida
           bosmaslik uchun. Kartalar ustida katta, ko'zga tashlanadigan tugma. */}
