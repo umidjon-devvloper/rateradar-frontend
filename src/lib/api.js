@@ -220,6 +220,9 @@ export const paymentApi = {
     api
       .post("/payments/invoice", { plan, successUrl })
       .then((r) => r.data),
+  // Visa/MC — o'z formamiz (/mps/pay, 3DS) → { paymentId, redirectUri }
+  createMps: (payload) =>
+    api.post("/payments/mps", payload).then((r) => r.data),
   // 2-qadam: karta yuborish → SMS-OTP keladi. saveCard=true bo'lsa kartani
   // bog'laydi (avto-to'lov) — bir OTP ham to'lov, ham bog'lash.
   submitCard: (paymentId, cardNumber, expiry, saveCard = false) =>

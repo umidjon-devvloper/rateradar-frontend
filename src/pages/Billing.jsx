@@ -79,22 +79,32 @@ export default function Billing() {
     }
   }
 
-  // ATMOS to'lov sahifasidan qaytish — ?pay=<id> bo'lsa holatni sinxronlaymiz.
+  // ATMOS to'lov sahifasidan/3DS'dan qaytish — ?pay=<id> yoki localStorage
+  // 'pendingMps' (Visa 3DS) bo'lsa holatni sinxronlaymiz.
   useEffect(() => {
-    const payId = searchParams.get('pay');
+    let payId = searchParams.get('pay');
+    let fromStorage = false;
+    if (!payId) {
+      try { payId = localStorage.getItem('pendingMps'); } catch (_) { /* noop */ }
+      fromStorage = Boolean(payId);
+    }
     if (!payId) return;
     (async () => {
       try {
-        const p = await paymentApi.get(payId); // backend invoice statusini sinxronlaydi
+        const p = await paymentApi.get(payId); // backend invoice/mps statusini sinxronlaydi
         if (p?.status === 'paid') {
           setPaidBanner(true);
           await refreshUser(); // user.plan / planExpiresAt yangilanadi
+          await loadCard();    // saqlangan karta ko'rinsin
         }
       } catch {
         /* e'tiborsiz */
       } finally {
-        searchParams.delete('pay');
-        setSearchParams(searchParams, { replace: true });
+        try { localStorage.removeItem('pendingMps'); } catch (_) { /* noop */ }
+        if (!fromStorage) {
+          searchParams.delete('pay');
+          setSearchParams(searchParams, { replace: true });
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

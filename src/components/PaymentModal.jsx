@@ -28,6 +28,8 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
   const [card, setCard] = useState('');
   const [expiry, setExpiry] = useState('');
   const [otp, setOtp] = useState('');
+  const [cvc, setCvc] = useState('');       // Visa/MC CVV
+  const [cardName, setCardName] = useState('');
   const [saveCard, setSaveCard] = useState(false); // opt-in: kartani eslab qol (avto-to'lov)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -75,19 +77,28 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
     }
   }
 
-  // Visa/Mastercard — ATMOS to'lov sahifasiga yo'naltiramiz (CVV + 3D-Secure
-  // o'sha yerda). Mahalliy karta+OTP oqimi Visa'ni qo'llab-quvvatlamaydi.
-  async function handleVisaCheckout() {
+  // Visa/Mastercard — o'z formamiz (/mps/pay). Karta bog'lanadi (avto-to'lov
+  // mumkin), 3DS uchun ATMOS redirectUri'ga yo'naltiramiz.
+  async function handleVisaSubmit(e) {
+    e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      // Toza URL (query'siz) — backend ?pay=<id> ni o'zi qo'shadi.
-      const successUrl = `${window.location.origin}/billing`;
-      const { url } = await paymentApi.createInvoice(plan.id, successUrl);
-      if (url) {
-        window.location.href = url; // ATMOS hosted to'lov sahifasi
+      const { redirectUri, paymentId } = await paymentApi.createMps({
+        plan: plan.id,
+        cardNumber: card.replace(/\s/g, ''),
+        expiry,
+        cvc: cvc.replace(/\D/g, ''),
+        cardName: cardName.trim(),
+        saveCard,
+      });
+      if (redirectUri) {
+        // 3DS'dan qaytgach holatni tekshirish uchun paymentId'ni saqlaymiz
+        // (qaytish URL'i ?pay=<id> ni olib kelmasa ham Billing tekshiradi).
+        try { localStorage.setItem('pendingMps', paymentId); } catch (_) {}
+        window.location.href = redirectUri; // ATMOS bank 3DS sahifasi
       } else {
-        setError(t('paymentNotReady') || 'To\'lov sahifasi yaratilmadi');
+        setError(t('paymentNotReady') || 'To\'lov boshlanmadi');
         setLoading(false);
       }
     } catch (err) {
@@ -184,9 +195,9 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
                 <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </button>
 
-              {/* Visa / Mastercard — ATMOS to'lov sahifasiga yo'naltiradi (CVV + 3DS) */}
+              {/* Visa / Mastercard — o'z formamiz (CVV + 3DS), karta saqlanadi */}
               <button
-                onClick={handleVisaCheckout}
+                onClick={() => { setError(''); setStep('visaCard'); }}
                 disabled={loading}
                 className="w-full text-left rounded-xl border border-primary/40 bg-primary/[0.04] hover:bg-primary/[0.08] transition-colors p-4 flex items-center gap-3 disabled:opacity-60"
               >
@@ -276,6 +287,91 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
                   t('sendSmsCode')
                 )}
               </Button>
+            </form>
+          )}
+
+          {step === 'visaCard' && (
+            <form onSubmit={handleVisaSubmit} className="space-y-4">
+              <div className="text-xs font-medium text-muted-foreground">
+                Visa · Mastercard
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">
+                  {t('cardNumberLabel')}
+                </label>
+                <Input
+                  inputMode="numeric" autoComplete="cc-number"
+                  placeholder="4231 2000 9000 7831"
+                  value={card}
+                  onChange={(e) => setCard(fmtCard(e.target.value))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">
+                  {lang === 'ru' ? 'Имя владельца карты' : lang === 'en' ? 'Cardholder name' : 'Karta egasining ismi'}
+                </label>
+                <Input
+                  autoComplete="cc-name" placeholder="UMIDJON GAFFOROV"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('cardExpiryLabel')}
+                  </label>
+                  <Input
+                    inputMode="numeric" autoComplete="cc-exp" placeholder="12/29"
+                    value={expiry}
+                    onChange={(e) => setExpiry(fmtExpiry(e.target.value))}
+                    required
+                  />
+                </div>
+                <div className="w-24">
+                  <label className="text-xs text-muted-foreground mb-1.5 block">CVV/CVC</label>
+                  <Input
+                    inputMode="numeric" autoComplete="cc-csc" placeholder="•••" maxLength={4}
+                    value={cvc}
+                    onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Kartani eslab qol — avto-to'lov (opt-in) */}
+              <label className="flex items-start gap-2.5 cursor-pointer select-none rounded-xl border border-border/60 bg-muted/30 p-3">
+                <input
+                  type="checkbox" checked={saveCard}
+                  onChange={(e) => setSaveCard(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary shrink-0"
+                />
+                <span className="text-xs leading-relaxed">
+                  <span className="font-medium">
+                    {lang === 'uz' ? 'Kartani eslab qol — har oy avtomatik to\'la'
+                      : lang === 'ru' ? 'Запомнить карту — автосписание каждый месяц'
+                      : 'Remember card — auto-charge every month'}
+                  </span>
+                </span>
+              </label>
+
+              <p className="text-[11px] text-muted-foreground bg-amber-500/10 rounded-lg px-3 py-2">
+                {lang === 'uz' ? 'Keyingi qadamda bankingizning 3D-Secure (SMS) tasdig\'i so\'raladi.'
+                  : lang === 'ru' ? 'На следующем шаге банк запросит 3D-Secure (SMS) подтверждение.'
+                  : 'Your bank will ask for 3D-Secure (SMS) confirmation on the next step.'}
+              </p>
+
+              {error && <p className="text-xs text-destructive">{error}</p>}
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('payBtn') || 'To\'lash'}
+              </Button>
+              <button type="button" onClick={() => { setError(''); setStep('method'); }}
+                className="w-full text-xs text-muted-foreground hover:text-foreground">
+                ← {t('back') || 'Orqaga'}
+              </button>
             </form>
           )}
 
