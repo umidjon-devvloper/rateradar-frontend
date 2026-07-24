@@ -28,6 +28,7 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
   const [card, setCard] = useState('');
   const [expiry, setExpiry] = useState('');
   const [otp, setOtp] = useState('');
+  const [saveCard, setSaveCard] = useState(false); // opt-in: kartani eslab qol (avto-to'lov)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -63,8 +64,8 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
     try {
       // 1-qadam: to'lov yaratish (har urinishda yangi tranzaksiya)
       const created = await paymentApi.create(plan.id);
-      // 2-qadam: karta yuborish → SMS-OTP
-      await paymentApi.submitCard(created.paymentId, card.replace(/\s/g, ''), expiry);
+      // 2-qadam: karta yuborish → SMS-OTP (saveCard=true → kartani bog'laydi)
+      await paymentApi.submitCard(created.paymentId, card.replace(/\s/g, ''), expiry, saveCard);
       setPaymentId(created.paymentId);
       setStep('otp');
     } catch (err) {
@@ -243,6 +244,28 @@ export function PaymentModal({ plan, onClose, onSuccess }) {
                   required
                 />
               </div>
+
+              {/* Kartani eslab qol — avto-to'lov (opt-in) */}
+              <label className="flex items-start gap-2.5 cursor-pointer select-none rounded-xl border border-border/60 bg-muted/30 p-3">
+                <input
+                  type="checkbox"
+                  checked={saveCard}
+                  onChange={(e) => setSaveCard(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary shrink-0"
+                />
+                <span className="text-xs leading-relaxed">
+                  <span className="font-medium">
+                    {lang === 'uz' ? 'Kartani eslab qol — har oy avtomatik to\'la'
+                      : lang === 'ru' ? 'Запомнить карту — автосписание каждый месяц'
+                      : 'Remember card — auto-charge every month'}
+                  </span>
+                  <span className="block text-muted-foreground mt-0.5">
+                    {lang === 'uz' ? 'Obuna muddati tugaganda avtomatik uzaytiriladi. Istalgan vaqt bekor qilasiz.'
+                      : lang === 'ru' ? 'Подписка продлится автоматически по истечении срока. Отмена в любой момент.'
+                      : 'Subscription renews automatically when it expires. Cancel anytime.'}
+                  </span>
+                </span>
+              </label>
 
               {error && <p className="text-xs text-destructive">{error}</p>}
 

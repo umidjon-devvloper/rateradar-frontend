@@ -220,10 +220,11 @@ export const paymentApi = {
     api
       .post("/payments/invoice", { plan, successUrl })
       .then((r) => r.data),
-  // 2-qadam: karta yuborish → SMS-OTP keladi
-  submitCard: (paymentId, cardNumber, expiry) =>
+  // 2-qadam: karta yuborish → SMS-OTP keladi. saveCard=true bo'lsa kartani
+  // bog'laydi (avto-to'lov) — bir OTP ham to'lov, ham bog'lash.
+  submitCard: (paymentId, cardNumber, expiry, saveCard = false) =>
     api
-      .post("/payments/card", { paymentId, cardNumber, expiry })
+      .post("/payments/card", { paymentId, cardNumber, expiry, saveCard })
       .then((r) => r.data),
   // 3-qadam: OTP tasdiqlash → pul yechiladi, obuna yoqiladi
   confirm: (paymentId, otp) =>
@@ -232,6 +233,11 @@ export const paymentApi = {
     api.post(`/payments/${paymentId}/resend-otp`).then((r) => r.data),
   list: () => api.get("/payments").then((r) => r.data.payments),
   get: (id) => api.get(`/payments/${id}`).then((r) => r.data.payment),
+  // Avto-to'lov (saqlangan karta)
+  savedCard: () => api.get("/payments/card").then((r) => r.data),
+  removeCard: () => api.delete("/payments/card").then((r) => r.data),
+  setAutoRenew: (enabled) =>
+    api.patch("/payments/auto-renew", { enabled }).then((r) => r.data),
 };
 
 export const pricesApi = {

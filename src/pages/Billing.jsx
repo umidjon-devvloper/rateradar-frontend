@@ -30,6 +30,8 @@ export default function Billing() {
   const [loading, setLoading] = useState(true);
   const [payPlan, setPayPlan] = useState(null);
   const [paidBanner, setPaidBanner] = useState(false);
+  const [savedCard, setSavedCard] = useState(null); // { card, autoRenew }
+  const [cardBusy, setCardBusy] = useState(false);
 
   async function load() {
     try {
@@ -39,9 +41,43 @@ export default function Billing() {
       setLoading(false);
     }
   }
+  async function loadCard() {
+    try {
+      const res = await paymentApi.savedCard();
+      setSavedCard(res);
+    } catch {
+      /* e'tiborsiz */
+    }
+  }
   useEffect(() => {
     load();
+    loadCard();
   }, []);
+
+  async function toggleAutoRenew() {
+    if (!savedCard?.card) return;
+    setCardBusy(true);
+    try {
+      const res = await paymentApi.setAutoRenew(!savedCard.autoRenew);
+      setSavedCard((s) => ({ ...s, autoRenew: res.autoRenew }));
+    } catch (e) {
+      alert(e.response?.data?.error || e.message);
+    } finally {
+      setCardBusy(false);
+    }
+  }
+  async function removeCard() {
+    if (!window.confirm(t('cardRemoveConfirm'))) return;
+    setCardBusy(true);
+    try {
+      await paymentApi.removeCard();
+      setSavedCard({ card: null, autoRenew: false });
+    } catch (e) {
+      alert(e.response?.data?.error || e.message);
+    } finally {
+      setCardBusy(false);
+    }
+  }
 
   // ATMOS to'lov sahifasidan qaytish — ?pay=<id> bo'lsa holatni sinxronlaymiz.
   useEffect(() => {
@@ -114,6 +150,60 @@ export default function Billing() {
           </div>
         )}
       </div>
+
+      {/* Saqlangan karta + avto-to'lov */}
+      {savedCard?.card && (
+        <div className="rounded-xl border bg-card p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold">
+                  {(savedCard.card.provider || 'card').toUpperCase()} ·{' '}
+                  {savedCard.card.pan}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t('cardExpiryLabel')}: {savedCard.card.expiry
+                    ? `${savedCard.card.expiry.slice(2)}/${savedCard.card.expiry.slice(0, 2)}`
+                    : '—'}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={removeCard}
+              disabled={cardBusy}
+              className="text-xs text-destructive hover:underline disabled:opacity-50"
+            >
+              {t('cardRemove')}
+            </button>
+          </div>
+
+          {/* Avto-to'lov tumbleri */}
+          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-4 py-3">
+            <div className="text-sm">
+              <div className="font-medium">{t('autoRenewLabel')}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{t('autoRenewHint')}</div>
+            </div>
+            <button
+              onClick={toggleAutoRenew}
+              disabled={cardBusy}
+              role="switch"
+              aria-checked={savedCard.autoRenew}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+                savedCard.autoRenew ? 'bg-primary' : 'bg-muted-foreground/30'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  savedCard.autoRenew ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      )}
 
       {data && !data.atmosReady && (
         <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
@@ -235,6 +325,7 @@ export default function Billing() {
           onSuccess={async () => {
             // user.plan yangilansin — paywall darhol ochiladi.
             await refreshUser();
+            await loadCard(); // saqlangan karta ko'rinsin (agar bog'langan bo'lsa)
             setPaidBanner(true);
           }}
         />
