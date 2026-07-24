@@ -108,6 +108,7 @@ export const ADMIN_T = {
     // Dashboard
     workProcess: "Ish jarayoni", today: "Bugun", total: "Jami",
     pending: "Kutilmoqda", accepted: "Jarayonda", completed: "Bajarildi",
+    adminResolved: "Admin hal qildi", adminSelf: "Admin (o'zi)",
     all: "Hammasi", allServices: "Barcha xizmat", allStatuses: "Barcha holat",
     roomNum: "Xona", service: "Xizmat", status: "Holat", staffCol: "Xodim",
     notAccepted: "hali qabul qilinmadi! Xodimlar javob bermayapti",
@@ -155,6 +156,7 @@ export const ADMIN_T = {
     saved: "Сохранено ✅", error: "Произошла ошибка", noData: "Нет данных",
     workProcess: "Рабочий процесс", today: "Сегодня", total: "Всего",
     pending: "Ожидание", accepted: "В процессе", completed: "Выполнено",
+    adminResolved: "Решил админ", adminSelf: "Админ (сам)",
     all: "Все", allServices: "Все услуги", allStatuses: "Все статусы",
     roomNum: "Номер", service: "Услуга", status: "Статус", staffCol: "Сотрудник",
     notAccepted: "ещё не принято! Сотрудники не отвечают",
@@ -196,6 +198,7 @@ export const ADMIN_T = {
     saved: "Saved ✅", error: "An error occurred", noData: "No data",
     workProcess: "Dashboard", today: "Today", total: "Total",
     pending: "Pending", accepted: "In Progress", completed: "Completed",
+    adminResolved: "Admin resolved", adminSelf: "Admin (self)",
     all: "All", allServices: "All services", allStatuses: "All statuses",
     roomNum: "Room", service: "Service", status: "Status", staffCol: "Staff",
     notAccepted: "not accepted yet! Staff not responding",

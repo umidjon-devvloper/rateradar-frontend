@@ -66,6 +66,12 @@ const TXT = {
   },
 };
 
+const COMING_SOON = {
+  uz: { title: "Tez orada", desc: "Xona TV tizimi ustida ishlayapmiz. Tez orada ishga tushadi." },
+  ru: { title: "Скоро", desc: "Мы работаем над системой ТВ для номеров. Скоро запустим." },
+  en: { title: "Coming soon", desc: "We're building the in-room TV system. Launching soon." },
+};
+
 export default function TvDevicesPage() {
   const { hotel } = useHotel();
   const { toast } = useToast();
@@ -155,8 +161,18 @@ export default function TvDevicesPage() {
     return h < 24 ? `${h} soat` : new Date(d.last_seen).toLocaleDateString();
   };
 
+  const cs = COMING_SOON[lang] || COMING_SOON.en;
+
   return (
-    <div className="space-y-4">
+    <div className="relative">
+      {/* Vaqtincha: "Tez orada" overlay — funksiya keyin yoqiladi */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[3px] text-center px-6">
+        <div className="text-4xl mb-3">🚧</div>
+        <div className="text-lg font-semibold text-gray-900">{cs.title}</div>
+        <div className="text-sm text-gray-500 mt-1 max-w-sm">{cs.desc}</div>
+      </div>
+
+      <div className="space-y-4 pointer-events-none select-none opacity-60">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -303,6 +319,7 @@ export default function TvDevicesPage() {
           </table>
         </div>
       )}
+      </div>
     </div>
   );
 }

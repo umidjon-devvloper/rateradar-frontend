@@ -197,9 +197,18 @@ export default function DashboardPage() {
                     {r.description_translated && <p className="text-xs text-gray-400 mt-0.5 max-w-[140px] truncate">{r.description_translated}</p>}
                   </td>
                   <td className="table-cell">
-                    <span className={statusBadge(r.status)}>{statusLabel(r.status)}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={statusBadge(r.status)}>{statusLabel(r.status)}</span>
+                      {r.admin_resolved && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-600 text-[10px] font-medium whitespace-nowrap">
+                          👑 {t("adminResolved")}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="table-cell text-gray-500">{r.staff?.full_name || "—"}</td>
+                  <td className="table-cell text-gray-500">
+                    {r.admin_resolved ? (t("adminSelf")) : (r.staff?.full_name || "—")}
+                  </td>
                   <td className="table-cell text-gray-400 text-xs whitespace-nowrap">{formatDate(r.created_at)}</td>
                   <td className="table-cell text-gray-400 text-xs">{r.accepted_at ? formatTime(r.accepted_at) : "—"}</td>
                   <td className="table-cell text-gray-400 text-xs">{r.completed_at ? formatTime(r.completed_at) : "—"}</td>
