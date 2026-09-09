@@ -15,6 +15,7 @@ import { useLang } from '@/lib/i18n';
 import { getCache, setCache } from '@/lib/clientCache';
 import { cn, formatUzsCompact } from '@/lib/utils';
 import ExelyStateCard, { classifyExelyError } from '@/components/ExelyStateCard';
+import RateGapCard from '@/components/RateGapCard';
 
 // ════════════════════════════════════════════════════════════════════
 // EXELY — o'z bronlarimdan chiqadigan HAMMA narsa bitta sahifada.
@@ -316,6 +317,11 @@ export default function Exely() {
           </span>
         </div>
       )}
+
+      {/* ── E'lon narxi ↔ amaldagi narx ─────────────────────────────
+          Kanallar jadvalidan OLDIN: u "qancha sotdim" deydi, bu esa
+          "e'lon qilgan narxim bilan olganim bir xilmi" deydi. */}
+      <RateGapCard />
 
       {/* ── Kanallar ────────────────────────────────────────────────── */}
       <Section

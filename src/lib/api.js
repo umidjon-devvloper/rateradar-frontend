@@ -282,6 +282,11 @@ export const metricsApi = {
   // Diqqat talab qiladigan kunlar — "bugun qaysi kunlarga qarashim kerak"
   actions: (days = 21, lang = 'uz') =>
     api.get("/metrics/actions", { params: { days, lang }, timeout: 90 * 1000 }).then((r) => r.data),
+  // E'lon narxi ↔ amalda olingan narx (kanal bo'yicha)
+  rateGap: (from, to) =>
+    api.get("/metrics/rate-gap", {
+      params: { ...(from && { from }), ...(to && { to }) }, timeout: 90 * 1000,
+    }).then((r) => r.data),
   distributions: (from, to) =>
     api.get("/metrics/distributions", {
       params: { ...(from && { from }), ...(to && { to }) }, timeout: 90 * 1000,
